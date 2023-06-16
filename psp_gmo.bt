@@ -1,0 +1,1524 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: Sony PSP Gmo model files
+//   Authors: Pioziomgames
+//   Version: 0.9
+//   Purpose: 
+//  Category: Models
+// File Mask: *.gmo
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// This template has a lot of repeated code that is possible to get rid off but it would require making it be v12.0.0+
+// only which is not something I'm willing to do, as well as not really necessary code existing only for estetic reasons
+
+#include "include/common.bt"
+
+//Enums
+
+typedef enum<short> {
+    BasePublic = 0x4000,
+
+	HalfChunk = 0x8000,
+
+	Block = 0x0001,
+	File = 0x0002,
+	Model = 0x0003,
+	Bone = 0x0004,
+	Part = 0x0005,
+	Mesh = 0x0006,
+	Arrays = 0x0007,
+	Material = 0x0008,
+	Layer = 0x0009,
+	Texture = 0x000a,
+	Motion = 0x000b,
+	FCurve = 0x000c,
+	BlindBlock = 0x000f,
+
+	Command = 0x0011,
+	FileName = 0x0012,
+	FileImage = 0x0013,
+	BoundingBox = 0x0014,
+	VertexOffset = 0x0015,
+	BoundingPoints = 0x0016,
+
+	DefineEnum = 0x0021,
+	DefineBlock = 0x0022,
+	DefineCommand = 0x0023,
+
+	ParentBone = 0x0041,
+	Visibility = 0x0042,
+	MorphWeights = 0x0043,
+	MorphIndex = 0x004f,
+	BlendBones = 0x0044,
+	BlendOffsets = 0x0045,
+	Pivot = 0x0046,
+	MultMatrix = 0x0047,
+	Translate = 0x0048,
+	RotateZYX = 0x0049,
+	RotateYXZ = 0x004a,
+	RotateQ = 0x004b,
+	Scale = 0x004c,
+	Scale2 = 0x004d,
+	Scale3 = 0x00e1,
+	BoneState = 0x00e2,
+	DrawPart = 0x004e,
+
+	SetMaterial = 0x0061,
+	BlendSubset = 0x0062,
+	SubDivision = 0x0063,
+	KnotVectorU = 0x0064,
+	KnotVectorV = 0x0065,
+	DrawArrays = 0x0066,
+	DrawParticle = 0x0067,
+	DrawBSpline = 0x0068,
+	DrawRectMesh = 0x0069,
+	DrawRectPatch = 0x006a,
+	MeshType = 0x006b,
+	MeshLevel = 0x006c,
+
+	RenderState = 0x0081,
+	Diffuse = 0x0082,
+	Specular = 0x0083,
+	Emission = 0x0084,
+	Ambient = 0x0085,
+	Reflection = 0x0086,
+	Refraction = 0x0087,
+	Bump = 0x0088,
+
+	SetTexture = 0x0091,
+	MapType = 0x0092,
+	MapFactor = 0x0093,
+	BlendFunc = 0x0094,
+	TexFunc = 0x0095,
+	TexFilter = 0x0096,
+	TexWrap = 0x0097,
+	TexCrop = 0x0098,
+	TexGen = 0x0099,
+	TexMatrix = 0x009a,
+
+	FrameLoop = 0x00b1,
+	FrameRate = 0x00b2,
+	FrameRepeat = 0x00b4,
+	Animate = 0x00b3,
+
+	BlindData = 0x00f1,
+	FileInfo = 0x00ff
+} GmoChunkType <read=GmoChunkType_String>;
+
+string GmoChunkType_String(GmoChunkType& input)
+{
+    local GmoChunkType val = input & ~HalfChunk;
+    return EnumToString(val);
+}
+
+typedef enum<int> {
+    GmoStateLIGHTING,
+    GmoStateFOG,
+    GmoStateTEXTURE,
+    GmoStateCULL_FACE,
+    GmoStateDEPTH_TEST,
+    GmoStateDEPTH_MASK,
+    GmoStateALPHA_TEST,
+    GmoStateALPHA_MASK
+} GmoState <read=GmoState_String>;
+
+string GmoState_String(GmoState& input)
+{
+    local string val = EnumToString(input);
+    return StrDel(val,0,8);
+}
+
+typedef enum<int> {
+    GmoBlendADD,
+    GmoBlendSUB,
+    GmoBlendREV,
+    GmoBlendMIN,
+    GmoBlendMAX,
+    GmoBlendDIFF,
+} GmoBlendFuncType <read=GmoState_String>;
+
+string GmoBlendFuncType_String(GmoBlendFuncType& input)
+{
+    local string val = EnumToString(input);
+    return StrDel(val,0,8);
+}
+
+typedef enum<int> {
+    GmoBlendZERO,
+    GmoBlendONE,
+    GmoBlendSRC_COLOR,
+    GmoBlendINV_SRC_COLOR,
+    GmoBlendDST_COLOR,
+    GmoBlendINV_DST_COLOR,
+    GmoBlendSRC_ALPHA,
+    GmoBlendINV_SRC_ALPHA,
+    GmoBlendDST_ALPHA,
+    GmoBlendINV_DST_ALPHA
+} GmoBlendValueType <read=GmoBlendValueType_String>;
+
+string GmoBlendValueType_String(GmoBlendValueType& input)
+{
+    local string val = EnumToString(input);
+    return StrDel(val,0,8);
+}
+
+typedef enum<int> {
+    GmoTexMODULATE,
+    GmoTexDECAL,
+} GmoTexFuncType <read=GmoTexFuncType_String>;
+
+string GmoTexFuncType_String(GmoTexFuncType& input)
+{
+    local string val = EnumToString(input);
+    return StrDel(val,0,6);
+}
+
+typedef enum<int> {
+    GmoTexRGB,
+    GmoTexRGBA,
+} GmoTexFuncFormat <read=GmoTexFuncFormat_String>;
+
+string GmoTexFuncFormat_String(GmoTexFuncFormat& input)
+{
+    local string val = EnumToString(input);
+    return StrDel(val,0,6);
+}
+
+typedef enum<int> {
+    GmoTexNEAREST,
+    GmoTexLINEAR,
+    GmoTexNEAREST_MIPMAP_NEAREST,
+    GmoTexLINEAR_MIPMAP_NEAREST,
+    GmoTexNEAREST_MIPMAP_LINEAR,
+    GmoTexLINEAR_MIPMAP_LINEAR,
+} GmoTexFilterType <read=GmoTexFilterType_String>;
+
+string GmoTexFilterType_String(GmoTexFilterType& input)
+{
+    local string val = EnumToString(input);
+    return StrDel(val,0,6);
+}
+
+typedef enum<ushort> {
+    GmoTexSYSTEMMASK = 0x00FF,
+    GmoTexTEXCOORD   = 0x0000,
+    GmoTexNORMAL     = 0x0001,
+    GmoTexVERTEX     = 0x0002,
+    GmoTexVECTORMASK = 0xFF00,
+    GmoTexLOCAL      = 0x0000,
+    GmoTexMODEL      = 0x0100,
+    GmoTexWORLD      = 0x0200,
+    GmoTexMODEL_ROT  = 0x0300,
+    GmoTexWORLD_ROT  = 0x0400,
+} GmoTexGenSystem <read=GmoTexGenSystem_String>;
+
+string GmoTexGenSystem_String(GmoTexGenSystem& input)
+{
+    local GmoTexGenSystem systemOnly = input & GmoTexSYSTEMMASK;
+    local GmoTexGenSystem vectorOnly = input & GmoTexVECTORMASK;
+    local string ToString = StrDel(EnumToString(systemOnly),0,6);
+    if ((vectorOnly) != 0)
+    {
+        ToString += "|" + StrDel(EnumToString(vectorOnly),0,6);
+    }
+    return ToString;
+}
+
+typedef enum<int> {
+    GmoWrapREAPEAT,
+    GmoWrapCLAMP,
+} GmoWrap <read=GmoWrap_String>;
+
+string GmoWrap_String(GmoWrap& input)
+{
+    local string val = EnumToString(input);
+    return StrDel(val,0,7);
+}
+
+typedef enum<int> {
+    GmoMeshFACE = 1,
+    GmoMeshEDGE = 2,
+    GmoMeshFACE_EDGE = 3,
+} GmoMeshTypeMode <read=GmoMeshTypeMode_String>;
+
+string GmoMeshTypeMode_String(GmoMeshTypeMode& input)
+{
+    local string val = EnumToString(input);
+    return StrDel(val,0,7);
+}
+
+typedef enum<int> {
+    GmoFCurveFLOAT16 = 0x0080,
+
+    GmoFCurveINTERP_MASK = 0x000f,
+    GmoFCurveCONSTANT = 0x0000,
+    GmoFCurveLINEAR = 0x0001,
+    GmoFCurveHERMITE = 0x0002,
+    GmoFCurveCUBIC = 0x0003,
+    GmoFCurveSPHERICAL = 0x0004,
+    
+    GmoFCurveEXTRAP_MASK = 0xff00,
+    GmoFCurveHOLD = 0x0000,
+    GmoFCurveCYCLE = 0x1100,
+    GmoFCurveSHUTTLE = 0x2200,
+    GmoFCurveREPEAT = 0x3300,
+    GmoFCurveEXTEND = 0x4400,
+
+    GmoFCurveEXTRAP_LEFT_MASK = 0x0f00,
+    GmoFCurveHOLD_LEFT = 0x0000,
+    GmoFCurveCYCLE_LEFT = 0x0100,
+    GmoFCurveSHUTTLE_LEFT = 0x0200,
+    GmoFCurveREPEAT_LEFT = 0x0300,
+    GmoFCurveEXTEND_LEFT = 0x0400,
+
+    GmoFCurveEXTRAP_RIGHT_MASK = 0xf000,
+    GmoFCurveHOLD_RIGHT = 0x0000,
+    GmoFCurveCYCLE_RIGHT = 0x1000,
+    GmoFCurveSHUTTLE_RIGHT = 0x2000,
+    GmoFCurveREPEAT_RIGHT = 0x3000,
+    GmoFCurveEXTEND_RIGHT = 0x4000,
+} GmoFCurveType <read=GmoFCurveType_String>;
+
+string GmoFCurveType_String(GmoFCurveType& input)
+{
+    local GmoFCurveType interp = ((input & ~GmoFCurveFLOAT16) & GmoFCurveINTERP_MASK);
+    local GmoFCurveType extrap = ((input & ~GmoFCurveFLOAT16) & GmoFCurveEXTRAP_MASK);
+    local string val = StrDel(EnumToString(interp),0,9);
+    if (extrap != 0)
+        val += "|" + StrDel(EnumToString(extrap),0,9);
+    return val;
+}
+
+typedef enum<int> {
+    GmoPrimTYPE_MASK      = 0x000f,
+    GmoPrimPOINTS         = 0x0000,
+    GmoPrimLINES          = 0x0001,
+    GmoPrimLINE_STRIP     = 0x0002,
+    GmoPrimTRIANGLES      = 0x0003,
+    GmoPrimTRIANGLE_STRIP = 0x0004,
+    GmoPrimTRIANGLE_FAN   = 0x0005,
+    GmoPrimRECTANGLES     = 0x0006,
+
+    GmoPrimSPLINE_MASK    = 0xf000,
+    GmoPrimOPEN_U         = 0x3000,
+    GmoPrimOPEN_V         = 0xc000,
+    GmoPrimOPEN_U_IN      = 0x1000,
+    GmoPrimOPEN_U_OUT     = 0x2000,
+    GmoPrimOPEN_V_IN      = 0x4000,
+    GmoPrimOPEN_V_OUT     = 0x4000,
+
+    GmoPrimSEQUENTIAL     = 0x0100,
+} GmoPrimMode <read=GmoPrimMode_String>;
+
+string GmoPrimMode_String(GmoPrimMode& input)
+{
+    local GmoPrimMode type = ((input & ~GmoPrimSEQUENTIAL) & GmoPrimTYPE_MASK);
+    local GmoPrimMode spline = ((input & ~GmoPrimSEQUENTIAL) & GmoPrimSPLINE_MASK);
+    local string val = StrDel(EnumToString(type),0,7);
+    if (spline != 0)
+        val += "|" + StrDel(EnumToString(spline),0,7);
+    if ((input & GmoPrimSEQUENTIAL) == GmoPrimSEQUENTIAL)
+        val += "|SEQUENTIAL";
+    return val;
+}
+
+typedef enum<int> {
+    GU_TEXTURE_NONE       = ( 0 <<  0 ),
+    GU_TEXTURE_UBYTE      = ( 1 <<  0 ),
+    GU_TEXTURE_USHORT     = ( 2 <<  0 ),
+    GU_TEXTURE_FLOAT      = ( 3 <<  0 ),
+    GU_COLOR_NONE         = ( 0 <<  2 ),
+    GU_COLOR_PF5650       = ( 4 <<  2 ),
+    GU_COLOR_PF5551       = ( 5 <<  2 ),
+    GU_COLOR_PF4444       = ( 6 <<  2 ),
+    GU_COLOR_PF8888       = ( 7 <<  2 ),
+    GU_NORMAL_NONE        = ( 0 <<  5 ),
+    GU_NORMAL_BYTE        = ( 1 <<  5 ),
+    GU_NORMAL_SHORT       = ( 2 <<  5 ),
+    GU_NORMAL_FLOAT       = ( 3 <<  5 ),
+    GU_VERTEX_NONE        = ( 0 <<  7 ),
+    GU_VERTEX_BYTE        = ( 1 <<  7 ),
+    GU_VERTEX_SHORT       = ( 2 <<  7 ),
+    GU_VERTEX_FLOAT       = ( 3 <<  7 ),
+    GU_WEIGHT_NONE        = ( 0 <<  9 ),
+    GU_WEIGHT_UBYTE       = ( 1 <<  9 ),
+    GU_WEIGHT_USHORT      = ( 2 <<  9 ),
+    GU_WEIGHT_FLOAT       = ( 3 <<  9 ),
+    GU_INDEX_NONE         = ( 0 << 11 ),
+    GU_INDEX_UBYTE        = ( 1 << 11 ),
+    GU_INDEX_USHORT       = ( 2 << 11 ),
+    GU_WEIGHT_1           = ( 0 << 14 ),
+    GU_WEIGHT_2           = ( 1 << 14 ),
+    GU_WEIGHT_3           = ( 2 << 14 ),
+    GU_WEIGHT_4           = ( 3 << 14 ),
+    GU_WEIGHT_5           = ( 4 << 14 ),
+    GU_WEIGHT_6           = ( 5 << 14 ),
+    GU_WEIGHT_7           = ( 6 << 14 ),
+    GU_WEIGHT_8           = ( 7 << 14 ),
+    GU_VERTEX_1           = ( 0 << 18 ),
+    GU_VERTEX_2           = ( 1 << 18 ),
+    GU_VERTEX_3           = ( 2 << 18 ),
+    GU_VERTEX_4           = ( 3 << 18 ),
+    GU_VERTEX_5           = ( 4 << 18 ),
+    GU_VERTEX_6           = ( 5 << 18 ),
+    GU_VERTEX_7           = ( 6 << 18 ),
+    GU_VERTEX_8           = ( 7 << 18 ),
+    GU_THROUGH            = ( 1 << 23 ),
+} GmoVertexType <read=GmoVertexType_ToString>;
+
+string GmoVertexType_ToString(GmoVertexType& val)
+{
+    local string str = "";
+
+    if ((val & GU_VERTEX_FLOAT) == GU_VERTEX_FLOAT)
+        str += "V32";
+    else if ((val & GU_VERTEX_SHORT) == GU_VERTEX_SHORT)
+        str += "V16";
+    else if ((val & GU_VERTEX_BYTE) == GU_VERTEX_BYTE)
+        str += "V8";
+
+    if ((val & GU_WEIGHT_8) == GU_VERTEX_8)
+        str += "x8 ";
+    else if ((val & GU_VERTEX_7) == GU_VERTEX_7)
+        str += "x7 ";
+    else if ((val & GU_VERTEX_6) == GU_VERTEX_6)
+        str += "x6 ";
+    else if ((val & GU_VERTEX_5) == GU_VERTEX_5)
+        str += "x5 ";
+    else if ((val & GU_VERTEX_4) == GU_VERTEX_4)
+        str += "x4 ";
+    else if ((val & GU_VERTEX_3) == GU_VERTEX_3)
+        str += "x3 ";
+    else if ((val & GU_VERTEX_2) == GU_VERTEX_2)
+        str += "x2 ";
+    else
+        str += " ";
+
+    if ((val & GU_NORMAL_FLOAT) == GU_NORMAL_FLOAT)
+        str += "N32 ";
+    else if ((val & GU_NORMAL_SHORT) == GU_NORMAL_SHORT)
+        str += "N16 ";
+    else if ((val & GU_NORMAL_BYTE) == GU_NORMAL_BYTE)
+        str += "N8 ";
+
+    if ((val & GU_COLOR_PF8888) == GU_COLOR_PF8888)
+        str += "C8888 ";
+    else if ((val & GU_COLOR_PF4444) == GU_COLOR_PF4444)
+        str += "C4444 ";
+    else if ((val & GU_COLOR_PF5551) == GU_COLOR_PF5551)
+        str += "C5551 ";
+    else if ((val & GU_COLOR_PF5650) == GU_COLOR_PF5650)
+        str += "C5650 ";
+
+    if ((val & GU_TEXTURE_FLOAT) == GU_TEXTURE_FLOAT)
+        str += "T32 ";
+    else if ((val & GU_TEXTURE_USHORT) == GU_TEXTURE_USHORT)
+        str += "T16 ";
+    else if ((val & GU_TEXTURE_UBYTE) == GU_TEXTURE_UBYTE)
+        str += "T8 ";
+
+    if ((val & GU_WEIGHT_FLOAT) != 0)
+    {
+        if ((val & GU_WEIGHT_FLOAT) == GU_WEIGHT_FLOAT)
+            str += "W32";
+        else if ((val & GU_WEIGHT_USHORT) == GU_WEIGHT_USHORT)
+            str += "W16";
+        else if ((val & GU_WEIGHT_UBYTE) == GU_WEIGHT_UBYTE)
+            str += "W8";
+
+        if ((val & GU_WEIGHT_8) == GU_WEIGHT_8)
+            str += "x8 ";
+        else if ((val & GU_WEIGHT_7) == GU_WEIGHT_7)
+            str += "x7 ";
+        else if ((val & GU_WEIGHT_6) == GU_WEIGHT_6)
+            str += "x6 ";
+        else if ((val & GU_WEIGHT_5) == GU_WEIGHT_5)
+            str += "x5 ";
+        else if ((val & GU_WEIGHT_4) == GU_WEIGHT_4)
+            str += "x4 ";
+        else if ((val & GU_WEIGHT_3) == GU_WEIGHT_3)
+            str += "x3 ";
+        else if ((val & GU_WEIGHT_2) == GU_WEIGHT_2)
+            str += "x2 ";
+        else
+            str += "x1 ";
+    }
+
+    local int size = (val & 0xff000000) >> 24;
+    local string sizestr;
+    SPrintf(sizestr, "(%i)", size);
+    str += sizestr;
+    
+    return str;
+}
+
+typedef enum<int> {
+    GmoStateZ_SORT = 0
+} GmoBoneStateMode <read=GmoBoneStateMode_String>;
+
+string GmoBoneStateMode_String(GmoBoneStateMode& input)
+{
+    return StrDel(EnumToString(input),0,8);
+}
+
+typedef enum<int> {
+    GmoRepeatHOLD = 0,
+    GmoRepeatCYCLE = 1,
+} GmoRepeat <read=GmoRepeat_String>;
+
+string GmoRepeat_String(GmoRepeat& input)
+{
+    return StrDel(EnumToString(input),0,9);
+}
+
+//Types
+
+typedef struct {
+    float R;
+    float G;
+    float B;
+    float A;
+    local string ToString;
+    SPrintf(ToString, "(%f,%f,%f,%f)", R, G, B, A);
+} RGBA <read=RGBA_String>;
+
+string RGBA_String(RGBA& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    float R;
+    float G;
+    float B;
+    local string ToString;
+    SPrintf(ToString, "(%f,%f,%f)", R, G, B);
+} RGB <read=RGB_String>;
+
+string RGB_String(RGB& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    float Z;
+    float Y;
+    float X;
+    local string ToString;
+    SPrintf(ToString, "(%f,%f,%f)", Z, Y, X);
+} RotZYX <read=RotZYX_String>;
+
+string RotZYX_String(RotZYX& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    float Y;
+    float X;
+    float Z;
+    local string ToString;
+    SPrintf(ToString, "(%f,%f,%f)", Y, X, Z);
+} RotYXZ <read=RotYXZ_String>;
+
+string RotYXZ_String(RotYXZ& input)
+{
+    return input.ToString;
+}
+
+typedef struct
+{
+    int Index : 12;
+    int Level : 4;
+    int Type : 15;
+
+    local GmoChunkType ChunkType = Type &~HalfChunk;
+    local string ToString;
+    SPrintf(ToString, "%i : %i", Level, Index);
+    ToString = EnumToString(ChunkType) + ": " + ToString;
+} GmoRef <read=GmoRef_String>;
+
+string GmoRef_String(GmoRef& input)
+{
+    return input.ToString;
+}
+
+typedef struct (int dimentions)
+{
+    float time;
+    
+    float values[dimentions] <optimize=true>;
+} GmoFrame <read=GmoFramr_String>;
+
+string GmoFrame_String(GmoFrame& input)
+{
+    string out;
+    SPrintf(out, "%f", input.time);
+    return out;
+}
+
+typedef struct (int dimentions)
+{
+    hfloat time;
+    
+    hfloat values[dimentions] <optimize=true>;
+} GmoHalfFrame <read=GmoHalfFrame_String>;
+
+string GmoHalfFrame_String(GmoHalfFrame& input)
+{
+    string out;
+    SPrintf(out, "%f", input.time);
+    return out;
+}
+
+//Specific Chunk Args and Data
+
+// Bone
+typedef struct {
+    Vector3 translation;
+    local string ToString = translation.ToString;
+} TranslateArgs <read=TranslateArgs_String>;
+
+string TranslateArgs_String(TranslateArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    Vector3 scale;
+    local string ToString = scale.ToString;
+} ScaleArgs <read=ScaleArgs_String>;
+
+string ScaleArgs_String(ScaleArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    Vector3 scale;
+    local string ToString = scale.ToString;
+} Scale2Args <read=Scale2Args_String>;
+
+string Scale2Args_String(Scale2Args& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    Vector3 scale;
+    local string ToString = scale.ToString;
+} Scale3Args <read=Scale3Args_String>;
+
+string Scale3Args_String(Scale3Args& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    RotZYX rotation;
+    local string ToString = rotation.ToString;
+} RotateZYXArgs <read=RotateZYXArgs_String>;
+
+string RotateZYXArgs_String(RotateZYXArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    RotYXZ rotation;
+    local string ToString = rotation.ToString;
+} RotateYXZArgs <read=RotateYXZArgs_String>;
+
+string RotateYXZArgs_String(RotateYXZArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    Vector4 rotation;
+    local string ToString = rotation.ToString;
+} RotateQArgs <read=RotateQArgs_String>;
+
+string RotateQArgs_String(RotateQArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    RotYXZ pivot;
+    local string ToString = rotation.ToString;
+} PivotArgs <read=PivotArgs_String>;
+
+string PivotArgs_String(PivotArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoRef parentBone;
+    local string ToString = parentBone.ToString;
+} ParentBoneArgs <read=ParentBoneArgs_String>;
+
+string ParentBoneArgs_String(ParentBoneArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    int visibilityFlags;
+    local string ToString;
+    SPrintf(ToString, "%i", visibilityFlags);
+} VisibilityArgs <read=VisibilityArgs_String>;
+
+string VisibilityArgs_String(VisibilityArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoRef parentBone;
+    local string ToString = parentBone.ToString;
+} DrawPartArgs <read=DrawPartArgs_String>;
+
+string DrawPartArgs_String(DrawPartArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    uint bonesCount;
+    GmoRef bones[bonesCount] <optimize=true>;
+    local string ToString;
+    SPrintf(ToString,"%i",bonesCount);
+} BlendBonesArgs <read=BlendBonesArgs_String>;
+
+string BlendBonesArgs_String(BlendBonesArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    uint offsetsCount;
+    Matrix4x4 offsets[offsetsCount] <optimize=true>;
+    local string ToString;
+    SPrintf(ToString,"%i",offsetsCount);
+} BlendOffsetsArgs <read=BlendOffsetsArgs_String>;
+
+string BlendOffsetsArgs_String(BlendOffsetsArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    Matrix4x4 matrix;
+} MultMatrixArgs ;
+
+typedef struct{
+    int weightsCount;
+    float weights[weightsCount];
+    local string ToString;
+    SPrintf(ToString,"%i",weightsCount);
+} MorphWeightsArgs <read=MorphWeightsArgs_String>;
+
+string MorphWeightsArgs_String(MorphWeightsArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    float index;
+    local string ToString;
+    SPrintf(ToString,"%f",index);
+} MorphIndexArgs <read=MorphIndexArgs_String>;
+
+string MorphIndexArgs_String(MorphIndexArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoBoneStateMode State;
+    int Value;
+    local string ToString;
+    SPrintf(ToString,"%s %i",GmoBoneStateMode_String(State),Value);
+} BoneStateArgs <read=MorphIndexArgs_String>;
+
+string BoneStateArgs_String(BoneStateArgs& input)
+{
+    return input.ToString;
+}
+
+// Part
+
+typedef struct{
+    GmoMeshTypeMode meshType;
+    string ToString = EnumToString(meshType);
+} MeshTypeArgs <read=MeshTypeArgs_String>;
+
+string MeshTypeArgs_String(MeshTypeArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    int minimumLevel;
+    int maximumLevel;
+    local string ToString;
+    SPrintf(ToString, "%i %i",minimumLevel,maximumLevel);
+} MeshLevelArgs <read=MeshLevelArgs_String>;
+
+string MeshLevelArgs_String(MeshLevelArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    int knotCount;
+    float knots[knotCount];
+    local string ToString;
+    SPrintf(ToString, "%i",knotCount);
+} KontVectorArgs <read=KontVectorArgs_String>;
+
+string KontVectorArgs_String(KontVectorArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    float divisionU;
+    float divisionV;
+    local string ToString;
+    SPrintf(ToString, "%f %f",divisionU,divisionV);
+} SubDivisionArgs <read=SubDivisionArgs_String>;
+
+string SubDivisionArgs_String(SubDivisionArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoRef arraysRef;
+    GmoPrimMode primMode;
+    int vertexCount;
+    int primitiveCount;
+    if ((primMode & GmoPrimSEQUENTIAL) == GmoPrimSEQUENTIAL)
+        short indicesStart;
+    else
+        short indices[vertexCount * primitiveCount];
+
+    local GmoPrimMode type = ((primMode & ~GmoPrimSEQUENTIAL) & GmoPrimTYPE_MASK);
+    local GmoPrimMode spline = ((primMode & ~GmoPrimSEQUENTIAL) & GmoPrimSPLINE_MASK);
+    local string val = StrDel(EnumToString(type),0,7);
+    if (spline != 0)
+        val += "|" + StrDel(EnumToString(spline),0,7);
+    if ((primMode & GmoPrimSEQUENTIAL) == GmoPrimSEQUENTIAL)
+        val += "|SEQUENTIAL";
+
+    local string ToString;
+    SPrintf(ToString, "%s %i*%i " + arraysRef.ToString, val,vertexCount, primitiveCount);
+} DrawArraysArgs <read=DrawArraysArgs_String>;
+
+string DrawArraysArgs_String(DrawArraysArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoVertexType format;
+	int vertexCount;
+	int morphCount;
+	GmoVertexType morphFormat;
+    local string ToString = "";
+    local string f = GmoVertexType_ToString(format);
+    local string m = GmoVertexType_ToString(morphFormat);
+    local int VertexSize = (format & 0xff000000) >> 24;
+    local int vertexSubCount = 1;
+    if ((format & GU_VERTEX_8) == GU_VERTEX_8)
+        vertexSubCount = 8;
+    else if ((format & GU_VERTEX_7) == GU_VERTEX_7)
+        vertexSubCount = 7;
+    else if ((format & GU_VERTEX_6) == GU_VERTEX_6)
+        vertexSubCount = 6;
+    else if ((format & GU_VERTEX_5) == GU_VERTEX_5)
+        vertexSubCount = 5;
+    else if ((format & GU_VERTEX_4) == GU_VERTEX_4)
+        vertexSubCount = 4;
+    else if ((format & GU_VERTEX_3) == GU_VERTEX_3)
+        vertexSubCount = 3;
+    else if ((format & GU_VERTEX_2) == GU_VERTEX_2)
+        vertexSubCount = 2;
+    SPrintf(ToString, "%s : %i*%i*%i : %s",f,vertexCount,vertexSubCount,morphCount,m );
+} ArraysArgs <read=ArraysArgs_String>;
+
+string ArraysArgs_String(ArraysArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    uint SubsetCount;
+    uint Subsets[SubsetCount];
+    local string ToString = "";
+    SPrintf(ToString, "%i",SubsetCount);
+} BlendSubsetArgs <read=BlendSubsetArgs_String>;
+
+string BlendSubsetArgs_String(BlendSubsetArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoRef MaterialRef;
+    local string ToString = GmoRef_String(MaterialRef);
+} SetMaterialArgs <read=SetMaterialArgs_String>;
+
+string SetMaterialArgs_String(SetMaterialArgs& input)
+{
+    return input.ToString;
+}
+
+// Material
+typedef struct {
+    GmoState state;
+    int value;
+    local string ToString;
+    SPrintf(ToString, " %i", value);
+    ToString = StrDel(EnumToString(state),0,8) + ToString;
+} RenderStateArgs <read=RenderStateArgs_String>;
+
+string RenderStateArgs_String(RenderStateArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    RGBA color;
+    local string ToString = color.ToString;
+} DiffuseArgs <read=DiffuseArgs_String>;
+
+string DiffuseArgs_String(DiffuseArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    RGBA color;
+    float shininess;
+    local string ToString;
+    SPrintf(ToString, " : %F", shininess);
+    ToString = color.ToString + ToString;
+} SpecularArgs <read=SpecularArgs_String>;
+
+string SpecularArgs_String(SpecularArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    RGBA color;
+    local string ToString = color.ToString;
+} EmissionArgs <read=EmissionArgs_String>;
+
+string EmissionArgs_String(EmissionArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    RGBA color;
+    local string ToString = color.ToString;
+} AmbientArgs <read=AmbientArgs_String>;
+
+string AmbientArgs_String(AmbientArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    float reflection;
+    local string ToString;
+    SPrintf(ToString, "(%f)", reflection);
+} ReflectionArgs <read=ReflectionArgs_String>;
+
+string ReflectionArgs_String(ReflectionArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    float refraction;
+    local string ToString;
+    SPrintf(ToString, "(%f)", refraction);
+} RefractionArgs <read=RefractionArgs_String>;
+
+
+string RefractionArgs_String(RefractionArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    float bump;
+    local string ToString;
+    SPrintf(ToString, "(%f)", bump);
+} BumpArgs <read=BumpArgs_String>;
+
+
+string BumpArgs_String(BumpArgs& input)
+{
+    return input.ToString;
+}
+
+// Layer
+
+typedef struct{
+    GmoRef texture;
+    local string ToString = texture.ToString;
+} SetTextureArgs <read=SetTextureArgs_String>;
+
+string SetTextureArgs_String(SetTextureArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoChunkType mapType;
+    local string ToString = EnumToString(mapType);
+} MapTypeArgs <read=MapTypeArgs_String>;
+
+string MapTypeArgs_String(MapTypeArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    float mapFactor;
+    local string ToString;
+    SPrintf(ToString, "%f", mapFactor);
+} MapFactorArgs <read=MapFactorArgs_String>;
+
+string MapFactorArgs_String(MapFactorArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoBlendFuncType function;
+    GmoBlendValueType source;
+    GmoBlendValueType destination;
+    local string ToString = StrDel(EnumToString(function),0,8) + " ";
+    ToString += StrDel(EnumToString(source),0,8) + " ";
+    ToString += StrDel(EnumToString(destination),0,8);
+} BlendFuncArgs <read=BlendFuncArgs_String>;
+
+string BlendFuncArgs_String(BlendFuncArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoTexFuncFormat function;
+    GmoTexFuncType mode;
+    local string ToString = StrDel(EnumToString(function),0,6) + " ";
+    ToString += StrDel(EnumToString(source),0,6);
+} TexFuncArgs <read=TexFuncArgs_String>;
+
+string TexFuncArgs_String(TexFuncArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoTexFilterType mag;
+    GmoTexFilterType min;
+    local string ToString = StrDel(EnumToString(mag),0,6) + " ";
+    ToString += StrDel(EnumToString(min),0,6);
+} TexFilterArgs <read=TexFilterArgs_String>;
+
+string TexFilterArgs_String(TexFilterArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoWrap u;
+    GmoWrap v;
+    local string ToString = StrDel(EnumToString(u),0,7) + " ";
+    ToString += StrDel(EnumToString(v),0,7);
+} TexWrapArgs <read=TexWrapArgs_String>;
+
+string TexWrapArgs_String(TexWrapArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    Vector4 crop;
+    local string ToString = crop.ToString;
+} TexCropArgs <read=TexCropArgs_String>;
+
+string TexCropArgs_String(TexCropArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    GmoTexGenSystem system;
+    local GmoTexGenSystem systemOnly = system & GmoTexSYSTEMMASK;
+    local GmoTexGenSystem vectorOnly = system & GmoTexVECTORMASK;
+    local string ToString = StrDel(EnumToString(systemOnly),0,6);
+    if ((vectorOnly) != 0)
+    {
+        ToString += "|" + StrDel(EnumToString(vectorOnly),0,6);
+    }
+} TexGenArgs <read=TexGenArgs_String>;
+
+string TexGenArgs_String(TexGenArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct{
+    Matrix4x4 texMatrix;
+} TexMatrixArgs;
+
+// Motion
+
+typedef struct {
+    float fps;
+    local string ToString;
+    SPrintf(ToString, "%f", fps);
+} FrameRateArgs <read=FrameRateArgs_String>;
+
+string FrameRateArgs_String(FrameRateArgs& input)
+{
+    return input.name;
+}
+
+typedef struct {
+    float start;
+    float end;
+    local string ToString;
+    SPrintf(ToString, "%f-%f", start,end);
+} FrameLoopArgs <read=FrameLoopArgs_String>;
+
+string FrameLoopArgs_String(FrameLoopArgs& input)
+{
+    return input.name;
+}
+
+typedef struct {
+    GmoRef blockRef;
+    GmoChunkType animatedType;
+    int index;
+    GmoRef fcurveRef;
+    local string ToString;
+    SPrintf(ToString, "%s - %s", blockRef.ToString, GmoChunkType_String(animatedType));
+} AnimateArgs <read=AnimateArgs_String>;
+
+string AnimateArgs_String(AnimateArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    GmoFCurveType fCurveType;
+    int dimentions;
+    int keys;
+    int reserved;
+    local string ToString;
+    local GmoFCurveType interp = ((fCurveType & ~GmoFCurveFLOAT16) & GmoFCurveINTERP_MASK);
+    local GmoFCurveType extrap = ((fCurveType & ~GmoFCurveFLOAT16) & GmoFCurveEXTRAP_MASK);
+    local string val = StrDel(EnumToString(interp),0,9);
+    if (extrap != 0)
+        val += "|" + StrDel(EnumToString(extrap),0,9);
+    SPrintf(ToString, "%s %i %i", val, dimentions, keys);
+} FCurveArgs <read=FCurveArgs_String>;
+
+string FCurveArgs_String(FCurveArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    GmoRepeat mode;
+    local string ToString = GmoRepeat_String(mode);
+} FrameRepeatArgs <read=FrameRepeatArgs_String>;
+
+string FrameRepeatArgs_String(FrameRepeatArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct (int keys, int dimentions, GmoFCurveType fCurveType) {
+    
+    if (fCurveType & GmoFCurveFLOAT16)
+    {
+        GmoHalfFrame frames(dimentions)[keys] <optimize=true>;
+    }
+    else
+    {
+        GmoFrame frames(dimentions)[keys] <optimize=true>;
+    }
+} FCurveData;
+
+// Common
+
+typedef struct {
+    string name;
+} FileNameArgs <read=FileNameArgs_String>;
+
+string FileNameArgs_String(FileNameArgs& input)
+{
+    return input.name;
+}
+
+typedef struct {
+	int imageSize ;
+	byte imageData[imageSize] ;
+    local string ToString;
+    SPrintf(ToString, "Size: %i", imageSize);
+} FileImageArgs <read=FileImageArgs_String>;
+
+string FileImageArgs_String(FileImageArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    Vector3 min;
+    Vector3 max;
+    local string ToString = min.ToString + " " + max.ToString;
+} BoundingBoxArgs <read=BoundingBoxArgs_String>;
+
+string BoundingBoxArgs_String(BoundingBoxArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    int pointsCounts;
+    Vector3 points[pointsCount] <optimize=true>;
+    local string ToString;
+    SPrintf(ToString, "%i", pointsCounts);
+} BoundingPointsArgs <read=BoundingPointsArgs_String>;
+
+string BoundingPointsArgs_String(BoundingPointsArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct (int argsSize) {
+    local uint start = FTell();
+    string name;
+    local uint size = argsSize - (FTell() - start);
+    local string ToString = "";
+    if (name == "UserProperty")
+    {
+        char value[size];
+        ToString = "UserProperty " + value;
+    }
+    else
+    {
+        FAlign(4);
+
+        if (name == "per3Helper")
+        {
+            int id;
+            Vector3 Translate;
+            Vector4 Rotation;
+            Vector2 Unused;
+            SPrintf(ToString, "per3Helper %i", id);
+        }
+        else if (name == "BlindData")
+        {
+            int testDataVal;
+            string testDataStr;
+            SPrintf(ToString, "BlindData %i %s", testDataVal,testDataStr);
+        }
+        else
+        {
+            int value[size/4];
+            ToString = name;
+        }
+    }
+} BlindDataArgs <read=BlindDataArgs_String>;
+
+string BlindDataArgs_String(BlindDataArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    GmoVertexType format;
+    local string ToString;
+    if ((format & GU_VERTEX_FLOAT) != 0)
+    {
+        Vector3 VOffset;
+        Vector3 VScale;
+        SPrintf(ToString, "Vertex - %s * %s", VOffset.ToString, VScale.ToString);
+    }
+    else if ((format & GU_TEXTURE_FLOAT) != 0)
+    {
+        Vector2 TOffset;
+        Vector2 TScale;
+        SPrintf(ToString, "Texture - %s * %s", TOffset.ToString, TScale.ToString);
+    }
+
+} VertexOffsetArgs <read=VertexOffsetArgs_String, optimize=false>;
+
+string VertexOffsetArgs_String(VertexOffsetArgs& input)
+{
+    return input.ToString;
+}
+
+// Define
+
+typedef struct {
+    ushort BlockId;
+    FAlign(2);
+    string BlockName;
+    local string ToString;
+    SPrintf(ToString, "0x%X: %s", BlockId, BlockName);
+} DefineBlockArgs <read=DefineBlockArgs_String, optimize=false>;
+
+string DefineBlockArgs_String(DefineBlockArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    string EnumName;
+    string SymbolName;
+    FAlign(4);
+    int SymbolValue;
+    local string ToString;
+    SPrintf(ToString, "%s: %s: 0x%X", EnumName, SymbolName, SymbolValue);
+} DefineEnumArgs <read=DefineEnumArgs_String, optimize=false>;
+
+string DefineEnumArgs_String(DefineEnumArgs& input)
+{
+    return input.ToString;
+}
+
+typedef struct {
+    ushort Id;
+    FAlign(2);
+    string TypeName;
+    local string ToString;
+    SPrintf(ToString, "0x%X: %s", Id, TypeName);
+} DefineCommandArgs <read=DefineCommandArgs_String, optimize=false>;
+
+string DefineCommandArgs_String(DefineCommandArgs& input)
+{
+    return input.ToString;
+}
+
+// Data
+
+typedef struct (ArraysArgs& args) {
+    byte Vertex[args.VertexSize];
+} GmoVertex <optimize=false>;
+
+typedef struct (ArraysArgs& args) {
+    GmoVertex Vertex (args)[args.vertexCount * args.vertexSubCount];
+    local string ToString;
+    SPrintf(ToString, "V%ix%i", args.VertexSize * 8, args.vertexCount);
+} ArraysData <optimize=false, read=ArraysData_String>;
+
+string ArraysData_String(ArraysData& input)
+{
+    return input.ToString;
+}
+
+
+//GmoChunk Main
+
+typedef struct{
+    SetRandomBackColor();
+    local uint start = FTell();
+    GmoChunkType ChunkType;
+    local int halfChunk = ((ChunkType & HalfChunk) != 0);
+    local string StringValue = "";
+
+
+    ushort ArgsOffs;
+    uint NextOffs;
+    
+    if (!halfChunk)
+    {
+        uint ChildOffs;
+        uint DataOffs;
+
+        if (FTell() < start + ArgsOffs)
+        {
+            string Name;
+            FSeek(start + ArgsOffs);
+        }
+        else local string Name = "";
+    }
+    else local string Name = "";
+    
+    switch ( ( ChunkType & ~HalfChunk ) )
+    {
+        //Bone
+        case Translate: TranslateArgs Args; StringValue = Args.ToString; break;
+        case Scale: ScaleArgs Args; StringValue = Args.ToString; break;
+        case Scale2: ScaleArgs Args; StringValue = Args.ToString; break;
+        case Scale3: ScaleArgs Args; StringValue = Args.ToString; break;
+        case RotateZYX: RotateZYXArgs Args; StringValue = Args.ToString; break;
+        case RotateYXZ: RotateYXZArgs Args; StringValue = Args.ToString; break;
+        case RotateQ: RotateQArgs Args; StringValue = Args.ToString; break;
+        case Pivot: PivotArgs Args; StringValue = Args.ToString; break;
+        case ParentBone: ParentBoneArgs Args; StringValue = Args.ToString; break;
+        case Visibility: VisibilityArgs Args; StringValue = Args.ToString; break;
+        case DrawPart: DrawPartArgs Args; StringValue = Args.ToString; break;
+        case BlendBones: BlendBonesArgs Args; StringValue = Args.ToString; break;
+        case BlendOffsets: BlendOffsetsArgs Args; StringValue = Args.ToString; break;
+        case MultMatrix: MultMatrixArgs Args; break;
+        case MorphWeights: MorphWeightsArgs Args; StringValue = Args.ToString; break;
+        case MorphIndex: MorphIndexArgs Args; StringValue = Args.ToString; break;
+        case BoneState: BoneStateArgs Args; StringValue = Args.ToString; break;
+
+        //Part
+        case MeshType: MeshTypeArgs Args; StringValue = Args.ToString; break;
+        case MeshLevel: MeshLevelArgs Args; StringValue = Args.ToString; break;
+        case KnotVectorU: KontVectorArgs Args; StringValue = Args.ToString; break;
+        case KnotVectorV: KontVectorArgs Args; StringValue = Args.ToString; break;
+        case SubDivision: SubDivisionArgs Args; StringValue = Args.ToString; break;
+        case DrawArrays: DrawArraysArgs Args; StringValue = Args.ToString; break;
+        case DrawParticle: DrawArraysArgs Args; StringValue = Args.ToString; break;
+        case DrawBSpline: DrawArraysArgs Args; StringValue = Args.ToString; break;
+        case DrawRectMesh: DrawArraysArgs Args; StringValue = Args.ToString; break;
+        case DrawRectPatch: DrawArraysArgs Args; StringValue = Args.ToString; break;
+        case Arrays: 
+        {
+            ArraysArgs Args;
+            StringValue = Args.ToString;
+            FAlign(4);
+
+            ArraysData Data(Args);
+            
+            break;
+        }
+        case BlendSubset: BlendSubsetArgs Args; StringValue = Args.ToString; break;
+        case SetMaterial: SetMaterialArgs Args; StringValue = Args.ToString; break;
+        
+
+        //Material
+        case RenderState: RenderStateArgs Args; StringValue = Args.ToString; break;
+        case Ambient: AmbientArgs Args; StringValue = Args.ToString; break;
+        case Diffuse: DiffuseArgs Args; StringValue = Args.ToString; break;
+        case Emission: EmissionArgs Args; StringValue = Args.ToString; break;
+        case Specular: SpecularArgs Args; StringValue = Args.ToString; break;
+        case Refraction: RefractionArgs Args; StringValue = Args.ToString; break;
+        case Reflection: ReflectionArgs Args; StringValue = Args.ToString; break;
+        case Bump: BumpArgs Args; StringValue = Args.ToString; break;
+
+        //Layer
+        case SetTexture: SetTextureArgs Args; StringValue = Args.ToString; break;
+        case MapType: MapTypeArgs Args; StringValue = Args.ToString; break;
+        case MapFactor: MapFactorArgs Args; StringValue = Args.ToString; break;
+        case BlendFunc: BlendFuncArgs Args; StringValue = Args.ToString; break;
+        case TexFunc: TexFuncArgs Args; StringValue = Args.ToString; break;
+        case TexFilter: TexFilterArgs Args; StringValue = Args.ToString; break;
+        case TexWrap: TexWrapArgs Args; StringValue = Args.ToString; break;
+        case TexCrop: TexCropArgs Args; StringValue = Args.ToString; break;
+        case TexGen: TexGenArgs Args; StringValue = Args.ToString; break;
+        case TexMatrix: TexMatrixArgs Args; break;
+    
+        //Motion
+        case FrameRate: FrameRateArgs Args; StringValue = Args.ToString; break;
+        case FrameLoop: FrameLoopArgs Args; StringValue = Args.ToString; break;
+        case Animate: AnimateArgs Args; StringValue = Args.ToString; break;
+        case FCurve: FCurveArgs Args; FCurveData Data(Args.keys, Args.dimentions, Args.fCurveType); StringValue = Args.ToString; break;
+        case FrameRepeat: FrameRepeatArgs Args; StringValue = Args.ToString; break;
+
+        //Common
+        case BlindData: BlindDataArgs Args(NextOffs - ArgsOffs - 8); StringValue = Args.ToString; break;
+        case FileName: FileNameArgs Args; StringValue = Args.name; break;
+        case FileImage: FileImageArgs Args; StringValue = Args.ToString; break;
+        case BoundingBox: BoundingBoxArgs Args; StringValue = Args.ToString; break;
+        case BoundingPoints: BoundingPointsArgs Args; StringValue = Args.ToString; break;
+        case VertexOffset: VertexOffsetArgs Args; StringValue = Args.ToString; break;
+
+        //Define
+        case DefineBlock: DefineBlockArgs Args; StringValue = Args.ToString; FSeek(start + NextOffs); break;
+        case DefineEnum: DefineEnumArgs Args; StringValue = Args.ToString; FSeek(start + NextOffs); break;
+        case DefineCommand: DefineCommandArgs Args; StringValue = Args.ToString; FSeek(start + NextOffs); break;
+
+        default: 
+        {
+            if (halfChunk)
+            {
+                local int argsSize = NextOffs - (ArgsOffs + 8);
+                if (argsSize > 0)
+                    byte Args[argsSize];
+            }
+            else
+            {
+                local int argsSize = DataOffs - ArgsOffs;
+                if (argsSize > 0)
+                    byte Args[argsSize];
+                FAlign(4);
+                local int dataSize = ChildOffs - ArgsOffs - 16;
+
+                if (dataSize > 0)
+                    byte Data[dataSize];
+            }
+        }
+    }
+    FAlign(4);
+
+    if (!halfChunk)
+    {
+        local int end = start + NextOffs - 7;
+        while (FTell() < end)
+            struct GmoChunk Children;
+        FAlign(4);
+    }
+
+
+} GmoChunk <optimize=false, read=GmoChunk_String>;
+
+
+string GmoChunk_String(GmoChunk& chunk)
+{
+    GmoChunkType val = chunk.ChunkType & ~HalfChunk;
+    
+    if (chunk.Name != "")
+        string out = EnumToString( val ) + " - " + chunk.Name;
+    else
+        string out =  EnumToString( val );
+
+    if (chunk.StringValue != "")
+    {
+        out += " - " + chunk.StringValue;
+    }
+
+    return out;
+}
+
+//GmoHeader
+
+typedef struct {
+    SetRandomBackColor();
+	uint Signature ;
+	uint Version ;
+	uint Style ;
+	uint Option ;
+
+    Assert( Signature == 0x2e474d4f );
+} GmoHeader;
+
+//GmoFile
+
+struct
+{
+    GmoHeader Header;
+    GmoChunk FileChunk;
+    
+} GmoFile <optimize=false>;

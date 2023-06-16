@@ -1,0 +1,68 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: P3Fes Cut-in Archives
+//   Authors: Pioziomgames
+//   Version: 1.5
+//   Purpose: Replacing data inside of cut-ins
+//  Category: Persona 3 Fes
+// File Mask: *.cpk
+//  ID Bytes: 
+//   History: 
+//   1.0 - Initial release
+//   1.5 - Rework
+//------------------------------------------------
+#include "include/common.bt"
+
+typedef struct
+{
+    if (!FEof())
+    {   
+        local int test = 0;
+        while(true)
+        {
+            if(FEof())
+            {
+                break;
+            }
+            if (ReadByte(FTell()) == 0)
+            {
+                FSkip(1);
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+} padding <optimize=false>;
+
+
+typedef struct
+{
+    char FileName[16];
+    ubyte Unknown[236];
+    int Size<name="File Size",bgcolor=cRed>;
+    ubyte File[Size]<name="File",bgcolor=cGreen>;
+    if (FTell() % 2 == 0)
+    {
+        padding Padding;
+    }
+    
+} CPKChunk <optimize=false>;
+
+
+typedef struct
+{
+    while (FEof() == false)
+    {
+        if (FTell() % 2 != 0)
+        {
+            FSkip(-1);
+        }
+        CPKChunk File;
+    }
+} CPKMain <optimize=false>;
+
+LittleEndian();
+CPKMain File;
