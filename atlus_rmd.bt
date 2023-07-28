@@ -3,7 +3,7 @@
 //
 //      File: Atlus rmd models (modified RenderWare)
 //   Authors: Pioziomgames
-//   Version: 1.4
+//   Version: 1.5
 //   Purpose: 
 //  Category: Models
 // File Mask: *.rmd
@@ -21,8 +21,8 @@ typedef enum<uint>
         RwExtension                       = 0x00000003, //Node storing other Nodes
         RwMaterial                        = 0x00000007, //Material data
         RwMaterialList                    = 0x00000008, //Material list
-        RwAtomicSector                    = 0x00000009, //
-        RwPlaneSector                     = 0x0000000A, //
+        RwAtomicSector                    = 0x00000009, //Sector containing model data 
+        RwPlaneSector                     = 0x0000000A, //Sector containing AtomicSectors
         RwWorld                           = 0x0000000B, //Scene data usually used for floors of battle fields
         RwFrameList                       = 0x0000000E, //List of bones
         RwGeometry                        = 0x0000000F, //Geometry data
@@ -71,6 +71,24 @@ typedef enum<ushort>
     Xbox = 0x8
 } RwDeviceId;
 
+typedef enum<uint>
+{
+    XboxId = 0x05,
+    D3D8Id = 0x08,
+    D3D9Id = 0x09,
+    PS2Id  = 0x325350,
+} RwPlatformId;
+
+typedef enum<ulong>
+{
+    None                = 0x00,
+    Nearest             = 0x01,
+    Linear              = 0x02,
+    MipNearest          = 0x03,
+    MipLinear           = 0x04,
+    LinearMipNearest    = 0x05,
+    LinearMipLinear     = 0x06
+} PS2FilterMode;
 
 typedef enum<ulong>
 {
@@ -94,6 +112,14 @@ typedef enum<ulong>
 
 typedef enum<ulong>
 {
+    Packed = 0,
+    Reglist = 1,
+    Image = 2,
+    Disable = 3
+} GifMode;
+
+typedef enum<ulong>
+{
     TempBufferNotChanged = 0,
     Load = 1,
     LoadCopyCbp0 = 2,
@@ -101,6 +127,22 @@ typedef enum<ulong>
     LoadCopyCbp0Neq = 4,
     LoadCopyCbp1Neq = 5
 } Tex0ClutBufferLoadControl;
+
+typedef enum<ulong>
+{
+    UpLtoLoR = 0x00,
+    LoLtoUpR = 0x01,
+    UpRtoLoL = 0x02,
+    LoRtoUpL = 0x03
+} PS2TrxposPixelTransmissionOrder;
+
+typedef enum<ulong>
+{
+    HostToLocal  = 0x00,
+    LocalToHost  = 0x01,
+    LocalToLocal = 0x02,
+    Deactivated  = 0x03
+} PS2TrxdirTransmissionDirection;
 
 typedef enum<ulong>
 {
@@ -121,7 +163,7 @@ typedef enum<ulong>
 
 typedef enum<uint>
 {
-    Unknown = 0x00004, // game will hang if not set
+    LockPixels = 0x00004, // game will hang if not set
     Format1555 = 0x00100,
     Format565 = 0x00200, // 5 bit R, 4 bit G, 5 bit B
     Format4444 = 0x00300, // 4 bit RGBA
@@ -133,7 +175,7 @@ typedef enum<uint>
     Pal8 = 0x02000, // 256 colors
     Pal4 = 0x04000, // 16 colors
     MipMap = 0x08000, // has mip maps
-    Swizzled = 0x10000, // the images are "swizzled"
+    Swizzled = 0x10000, // the images are swizzled
     HasHeaders = 0x20000  // the image data is preceeded by headers
 } RwRasterFormat <read=RwRasterFormat_ToString>;
 
@@ -177,8 +219,8 @@ string RwRasterFormat_ToString(RwRasterFormat& val)
 {
     local string str = "";
 
-    if ((val & Unknown) == Unknown)
-        str += "Unknown ";
+    if ((val & LockPixels) == LockPixels)
+        str += "LockPixels ";
 
     if ((val & Format555) == Format555)
         str += "Format555 ";
@@ -361,17 +403,50 @@ typedef struct{
 } RmdNodeLink <optimize=false>;
 
 typedef struct {
-    uint64 GifTag0;
-    uint64 GifTag1;
-    uint64 trxPosRegister;
+    BitfieldDisablePadding();
+    ulong RepeatCount : 15;
+    ulong NoFollowingPrimitive : 1;
+    ulong Unused : 30 <hidden=true>;
+    ulong UsePrimitiveData : 1;
+    ulong PrimitiveData : 11;
+    GifMode Mode : 2;
+    ulong RegisterDescriptorCount : 4;
+} GifTag;
+
+typedef struct {
+    BitfieldDisablePadding();
+    ulong SourceRectangleX : 11;
+    ulong Unused1 : 5 <hidden=true>;
+    ulong SourceRectangleY : 11;
+    ulong Unused2 : 5 <hidden=true>;
+    ulong DestinationRectangleX : 11;
+    ulong Unused3 : 5 <hidden=true>;
+    ulong DestinationRectangleY : 11;
+    PS2TrxposPixelTransmissionOrder PixelTransmissionOrder : 2;
+} TRXPOSRegister;
+
+typedef struct {
+    uint TransmissionWidth;
+    uint TransmissionHeight;
+} TRXREGRegister;
+
+typedef struct {
+    PS2TrxdirTransmissionDirection TransmissionDirection;
+    int Thanks010<hidden=true>;
+} TRXDIRRegister;
+
+typedef struct {
+    GifTag GifTag0;
+    GifTag GifTag1;
+    TRXPOSRegister trxPosRegister;
     uint64 trxPosAddress;
-    uint64 trxRegRegister;
+    TRXREGRegister trxRegRegister;
     uint64 trxRegAddress;
-    uint64 trxDirRegister;
+    TRXDIRRegister trxDirRegister;
     uint64 trxDirAddress;
-    uint64 GifTag2;
-    uint64 GifTag3;
-} Ps2ImageHeader;
+    GifTag GifTag2;
+    GifTag GifTag3;
+} Ps2ImageHeader <optimize=false>;
 
 
 typedef struct {
@@ -391,6 +466,34 @@ typedef struct {
     Tex0ClutBufferLoadControl ClutBufferLoadControl : 3;
 } Tex0Register;
 
+
+typedef struct {
+    BitfieldDisablePadding();
+    ulong FixedLodValue : 1;
+    ulong Unused1 : 1 <hidden=true>;
+    ulong MaxMipLevel : 3;
+    PS2FilterMode MipMaxFilter : 2;
+    PS2FilterMode MipMinFilter : 2;
+    ulong AutoMipAddress : 1;
+    ulong Unused2 : 9 <hidden=true>;
+    ulong MipL : 2;
+    ulong Unused3 : 11 <hidden=true>;
+    ulong MipK : 12;
+    ulong Unused4 : 20 <hidden=true>;
+} Tex1Register <optimize=false>;
+
+
+typedef struct {
+    BitfieldDisablePadding();
+    ulong Mip1BasePointer : 14;
+    ulong Mip1BufferWidth : 6;
+    ulong Mip2BasePointer : 14;
+    ulong Mip2BufferWidth : 6;
+    ulong Mip3BasePointer : 14;
+    ulong Mip3BufferWidth : 6;
+    ulong Unused1 : 4 <hidden=true>;
+} MipTbpRegister <optimize=false>;
+
 typedef struct {
     struct RwChunkHeader header;
     int Width;
@@ -398,21 +501,22 @@ typedef struct {
     int Depth;
     RwRasterFormat Format;
     Tex0Register Tex0Reg;
-    uint64 Tex1Reg;
-    uint64 MipTBP1Reg;
-    uint64 MipTBP2Reg;
+    Tex1Register Tex1Reg;
+    MipTbpRegister MipTBP1Reg;
+    MipTbpRegister MipTBP2Reg;
     uint TexelDataLength;
     uint PaletteDataLength;
     uint GpuAlignedLength;
     uint SkyMipMapValue;
-} RwRasterInfoStruct;
+} RwRasterInfoStruct <optimize=false>;
 
 typedef struct (RwRasterInfoStruct &Info) {
     struct RwChunkHeader header;
     if ((HasHeaders & Info.Format ) == HasHeaders)
     {
         Ps2ImageHeader ImageHeader;
-        byte ImageData[Info.TexelDataLength - 80];
+        local int imagesize = Info.TexelDataLength - 80;
+        byte ImageData[imagesize];
     }
     else
     {
@@ -442,14 +546,14 @@ typedef struct (RwRasterInfoStruct &Info) {
     }
     //byte ImageData[header.startPos + header.ChunkSize - FTell()];
     
-} RwRasterDataStruct;
+} RwRasterDataStruct <optimize=false>;
 
 
 typedef struct {
     struct RwChunkHeader header;
     RwRasterInfoStruct RasterInfo;
     RwRasterDataStruct RasterData(RasterInfo);
-} RwRasterStruct;
+} RwRasterStruct <optimize=false>;
 
 typedef struct {
     local int startPos = FTell() + 12;
@@ -457,7 +561,7 @@ typedef struct {
     RwNodeId ChunkId;
     uint ChunkSize;
     uint ChunkVersion;
-} RwChunkHeader;
+} RwChunkHeader <optimize=false>;
 
 typedef struct {
     int NodeId;
@@ -780,7 +884,9 @@ typedef struct {
         break;
 
     case RwTextureNative:
-        struct RmdChunk StructNode <name="Struct">;
+        FSkip(12);
+        RwPlatformId Platform;
+        uint Flags;
         struct RmdChunk NameNode <name="Name">;
         struct RmdChunk MaskNameNode <name="MaskName">;
         RwRasterStruct RasterStructNode <name="RasterStruct">;
