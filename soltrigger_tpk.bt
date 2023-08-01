@@ -1,0 +1,52 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Sol Trigger's TPK Archives
+//   Authors: Pioziomgames
+//   Version: 1.0
+//   Purpose: 
+//  Category: Archives
+// File Mask: *.tpk
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "include/common.bt"
+
+typedef struct
+{
+    SetRandomBackColor();
+    FSeek(FTell()+8);
+    uint Offset;
+    char EntryName[20];
+    if (Offset != 0)
+    {
+        local uint Start = FTell();
+        FSeek(Start + 8);
+        local uint End = ReadUInt();
+        if (End == 0 || End > FileSize())
+        {
+            End = FileSize();
+        }
+        FSeek(Offset);
+        byte EntryData[End-Offset];
+        FSeek(Start);
+    }
+} GPKEntry <optimize = false>;
+
+struct
+{
+    uint Magic <bgcolor=cRed>;
+    if (Magic == 811227738) //Archive is compressed with zlib
+    {
+        uint UncompressedSize <bgcolor=cBlue>;
+        uint Reserved <bgcolor=cGreen>;
+        byte ZLibCompressedData[FileSize()-FTell()] <bgcolor=cPurple>;
+    }
+    else
+    {
+        uint FileCount <bgcolor=cGreen>;
+        FSeek(0);
+        GPKEntry Entries[FileCount];
+    }
+} GPKFile <optimize = false>;

@@ -1,32 +1,3 @@
-//Functions
-
-
-void FAlign( uint value )
-{
-	FSeek((FTell() + (value - 1)) & ~(value - 1) );
-}
-
-uint Align( uint value, uint alignvalue )
-{
-	return (value + (alignvalue - 1)) & ~(alignvalue - 1);
-}
-local uint RandomBit = 0;
-local uint RandomCount = 0;
-local uint RandomSeed = 0x1337C0DE;
- 
-void SetRandomBackColor()
-{
-    
-    ++RandomCount;
-    RandomBit  = ( (RandomSeed >> 0 ) ^ ( RandomSeed >> 2 ) ^ ( RandomSeed >> 3 ) ^ ( RandomSeed >> 5 ) ) & 1;
-    RandomSeed = ( ( ( ( RandomBit << 15 ) | ( RandomSeed >> 1 ) ) + ( 0xC0DE / RandomCount ) ) % 0xFFFFFFFF );
-
-    while( RandomSeed < 0 )
-        RandomSeed += 0xFFFFFFFF;
-
-     SetBackColor( RandomSeed);
-}
-
 
 //Types
 
@@ -103,3 +74,31 @@ typedef struct {
     Vector4 row3;
     Vector4 row4;
 } Matrix4x4;
+
+//Functions
+
+void FAlign( uint value )
+{
+	FSeek((FTell() + (value - 1)) & ~(value - 1) );
+}
+
+uint Align( uint value, uint alignvalue )
+{
+	return (value + (alignvalue - 1)) & ~(alignvalue - 1);
+}
+local uint RandomBit = 0;
+local uint RandomCount = 0;
+local uint RandomSeed = 0x1337C0DE;
+ 
+void SetRandomBackColor()
+{
+    
+    ++RandomCount;
+    RandomBit  = ( (RandomSeed >> 0 ) ^ ( RandomSeed >> 2 ) ^ ( RandomSeed >> 3 ) ^ ( RandomSeed >> 5 ) ) & 1;
+    RandomSeed = ( ( ( ( RandomBit << 15 ) | ( RandomSeed >> 1 ) ) + ( 0xC0DE / RandomCount ) ) % 0xFFFFFFFF );
+
+    while( RandomSeed < 0 )
+        RandomSeed += 0xFFFFFFFF;
+
+     SetBackColor( RandomSeed);
+}

@@ -79,7 +79,7 @@ typedef struct
 struct
 {
     char MAGIC[4];
-    if (MAGIC != "ATBC")
+    if (MAGIC != "ATBC" && MAGIC != "ABCH")
     {
         Warning("Not a proper bam file!");
         Exit(1);
@@ -96,28 +96,30 @@ struct
     uint MtnOffset;
     byte padding[4];
     
-
-    int HeaderData[HeaderSize];
+    if (HeaderSize != 0)
+        int HeaderData[HeaderSize];
 
     local int readMtn = 1;
-    FSeek(MtnOffset);
-    while (readMtn == 1)
+    if (MtnOffset != 0)
     {
-        if (ReadByte() == 0)
+        FSeek(MtnOffset);
+        while (readMtn == 1)
         {
-            FSeek(EplOffset);
-            readMtn = 0;
+            if (ReadByte() == 0)
+            {
+                FSeek(EplOffset);
+                readMtn = 0;
+            }
+            if (FTell() != EplOffset)
+            {
+                MtnChunk MtnSign;
+            }
+            else
+            {
+                readMtn = 0;
+            }
         }
-        if (FTell() != EplOffset)
-        {
-            MtnChunk MtnSign;
-        }
-        else
-        {
-            readMtn = 0;
-        }
-    }   
-
+    }
     if (EplCount > 0)
     {
         local int readEpl = 1;
