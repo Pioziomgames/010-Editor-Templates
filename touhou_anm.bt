@@ -1,0 +1,168 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Touhou (for now only 6) sprite definition, animation and script files (also affects transformation of 3d planes)
+//   Authors: Pioziomgames
+//   Version: 0.2
+//   Purpose: Editing / interpreting sprite values and animations
+//  Category: 
+// File Mask: *.anm
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+
+#include "include/common.bt"
+
+typedef struct
+{
+    uint SpriteCount;
+    uint FunctionCount;
+    int Reserved;
+    uint Width;
+    uint Height;
+    uint Format;
+    uint ColorKey;
+    uint NameOffset;
+    int Unused1;
+    uint Name2Offset;
+    uint Version;
+    uint MemoryPriority;
+    uint ThtxOffset;
+    ushort HasData;
+    ushort Unused2;
+    uint NextOffset;
+    uint Unused3;
+} AnmEntryHeader;
+
+typedef struct
+{
+    SetRandomBackColor();
+    uint SpriteOffset;
+    local uint Current = FTell();
+    FSeek(SpriteOffset);
+    uint Id;
+    Vector2 Offset;
+    Vector2 Size;
+    FSeek(Current);
+} AnmSprite <optimize=false>;
+
+typedef enum<ubyte> {
+    EndScript = 0,
+    LoadSprite = 1,
+    SetScale = 2,
+    SetAlpha = 3,
+    SetColor = 4,
+    Jump = 5,
+    Nop = 6,
+    FlipX = 7,
+    FlipY = 8,
+    Rotate = 9,
+    SetVelocity = 10,
+    SetGrowth = 11,
+    SetAlphaTime = 12,
+    BlendAdditive = 13,
+    BlendRestore = 14,
+    Freeze = 15,
+    SetRandSprite = 16,
+    SetPos = 17,
+    SetPosTimeLinear = 18,
+    SetPosTimeDecel = 19,
+    SetPosTimeDecel2 = 20,
+    Stop = 21,
+    InterruptLabel = 22,
+    AnchorTopLeft = 23,
+    StopAndHide = 24,
+    SetPosMode = 25,
+    Ins26 = 26,
+    ScrollNowX = 27,
+    ScrollNowY = 28,
+    SetVisible = 29,
+    ScaleTimeLinear = 30,
+    ZWriteDisable = 31, 
+} AnmInstructionType; //Touhou 6
+
+
+typedef struct
+{
+    ushort Frame;
+    AnmInstructionType Type;
+    ubyte Size;
+    switch (Type)
+    {
+        case LoadSprite: int SpriteId; break;
+        case SetScale: Vector2 Scale; break;
+        case SetAlpha: int alpha; break;
+        case SetColor: int color; break;
+        case Jump: int dest; break;
+        case Rotate: Vector3 Rotation; break;
+        case SetVelocity: Vector3 RotationVelocity; break;
+        case SetGrowth: Vector2 ScaleGrowth; break;
+        case SetAlphaTime: int alpha; int frames; break;
+        case SetRandSprite: int RangeFrom; int RangeTo; break;
+        case SetPos: Vector3 Pos; break;
+        case SetPosTimeLinear:
+        case SetPosTimeDecel:
+        case SetPosTimeDecel2: Vector3 Pos; int frames; break;
+        case InterruptLabel: int n; break;
+        case SetPosMode: int mode; break;
+        case ScrollNowX: float u; break;
+        case ScrollNowY: float v; break;
+        case SetVisible: ubyte visible; break;
+        case ScaleTimeLinear: Vector2 Scale; int frames; break;
+        case ZWriteDisable: int disable; break;
+        default: 
+                if (Size > 0)
+                    ubyte ArgumentData[Size];
+    }
+    
+} AnmInstruction <optimize=false>;
+
+typedef struct
+{
+    SetRandomBackColor();
+    int Id;
+    uint FunctionOffset;
+    local uint Current = FTell();
+    FSeek(FunctionOffset);
+    local int End = 1;
+    while (End != 0)
+    {
+        AnmInstruction Instruction;
+        End = Instruction.Type;
+    }
+    FSeek(Current);
+} AnmFunction <optimize=false>;
+
+typedef struct (uint SpriteCount)
+{
+    AnmSprite Sprites[SpriteCount];
+} AnmSprites;
+
+
+typedef struct (uint FunctionCount)
+{
+    AnmFunction Function[FunctionCount];
+} AnmScript <optimize=false>;
+
+struct
+{
+    SetRandomBackColor();
+    AnmEntryHeader Header;
+    SetRandomBackColor();
+    AnmSprites Sprites(Header.SpriteCount);
+    SetRandomBackColor();
+    AnmScript Script(Header.FunctionCount);
+    if (Header.NameOffset > 0)
+    {
+        FSeek(Header.NameOffset);
+        SetRandomBackColor();
+        string Name;
+    }
+    if (Header.Name2Offset > 0)
+    {
+        FSeek(Header.Name2Offset);
+        SetRandomBackColor();
+        string Name2;
+    }
+} AnmFile;

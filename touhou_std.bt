@@ -1,0 +1,175 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Touhou (for now only 6) stage files (mostly camera animation and fog but also has stuff like music)
+//   Authors: Pioziomgames
+//   Version: 0.2
+//   Purpose: Editing / interpreting stage values and animations
+//  Category: 
+// File Mask: *.anm
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "include/common.bt"
+
+typedef enum<ushort> {
+    PosKeyFrame = 0x0000,
+    Fog         = 0x0001,
+    CameraFace  = 0x0002,
+    FacingTime  = 0x0003,
+    FogTime     = 0x0004,
+    Pause       = 0x0005,
+    EOF         = 0xFFFF,
+} StdInstructionType <read=StdInstructionType_Read>;
+
+
+string StdInstructionType_Read(StdInstructionType& input)
+{
+    return EnumToString(input);
+}
+
+typedef struct
+{
+    char Value[128];
+} String128 <read=Value>;
+
+typedef struct
+{
+    String128 StageName;
+    String128 BGMNames[4];
+    String128 BGMPaths[4];
+} STDExtra; //Probably only like this for TH6
+
+typedef struct
+{
+    short Type;
+    ushort QuadSize;
+
+    if (Type != -1)
+    {
+        ushort AnmScript;
+        ushort Reserved;
+        
+        if (Type == 0 && QuadSize == 0x1c)
+        {
+            Vector3 Position;
+            Vector2 Size;
+        }
+        else if (Type == 1 && QuadSize == 0x24)
+        {
+            Vector3 Start;
+            Vector3 End;
+            float Width;
+        }
+        else
+            byte UnknownQuadData[QuadSize];
+    }
+} StdQuad<optimize=false >;
+
+
+typedef struct
+{
+    local int End = 0;
+    while (End != -1)
+    {
+        StdQuad Quad;
+        End = Quad.Type;
+    }
+} StdQuads;
+
+typedef struct
+{
+    uint Offset;
+    local uint current = FTell();
+    FSeek(Offset);
+    ushort Id;
+    ushort Layer;
+    Vector3 Position;
+    Vector3 Size;
+    StdQuads Quads;
+    FSeek(current);
+} StdObject <optimize=false,read=StdObject_Read>;
+
+string StdObject_Read(StdObject& value)
+{
+    string ToString;
+    SPrintf(ToString, "%i - %i @ %s", value.Id, value.Layer, value.Position.ToString);
+    return ToString;
+}
+
+typedef struct
+{
+    short ObjectIndex;
+    ushort Unk;
+    Vector3 Position;
+} StdInstance;
+
+
+typedef struct
+{
+    ushort ObjectCount;
+    ushort QuadCount;
+    uint InstancesOffset;
+    uint ScriptOffset;
+    uint Unk;
+} STDHeader;
+
+typedef struct
+{
+    uint time;
+    StdInstructionType Type;
+    ushort Size;
+    switch(Type)
+    {
+        case PosKeyFrame: Vector3 CameraPosition; break;
+        case Fog: int FogColor; float Near; float far; break;
+        case CameraFace: Vector3 Direction; break;
+        case FacingTime: int Frames; byte Padding[8]; break;
+        case FogTime: int Frames; byte Padding[8]; break;
+        case Pause: byte Padding[12]; break;
+        case EOF: byte EOFData[12]; return;
+        default: byte UnknownInstruction[Size];
+    }
+} STDInstruction;
+
+typedef struct STDScript
+{
+    while (true)
+    {
+        STDInstruction Instruction;
+        if (Instruction.Type == EOF)
+            return;
+    }
+} STDScript;//Touhou 6 instructions;
+
+typedef struct (ushort ObjectCount)
+{
+    StdObject StdObjects[ObjectCount];
+} StdObjects;
+
+typedef struct
+{
+    local int End = 0;
+    while (End != -1)
+    {
+        StdInstance Instance;
+        End = Instance.ObjectIndex;
+    }
+} StdInstances;
+
+struct 
+{
+    SetRandomBackColor();
+    STDHeader Header;
+    SetRandomBackColor();
+    STDExtra Extra;
+    SetRandomBackColor();
+    StdObjects Objects(Header.ObjectCount);
+    FSeek(Header.InstancesOffset);
+    SetRandomBackColor();
+    StdInstances Instances;
+    FSeek(Header.ScriptOffset);
+    SetRandomBackColor();
+    STDScript Script;
+} STDFile;

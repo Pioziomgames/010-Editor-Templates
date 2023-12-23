@@ -2827,17 +2827,17 @@ enum<ubyte> ElementalType
 typedef struct
 {
     byte : 5;
-    bool Makoto : 1 <name = "Equippable by Makoto">;
-    bool Yosuke : 1 <name = "Equippable by Yukari">;
-    bool Aigis : 1 <name = "Equippable by Aigis">;
-    bool Mitsuru : 1 <name = "Equippable by Mitsuru">;
-    bool Junpei : 1 <name = "Equippable by Junpei">;
-    bool Fuuka : 1 <name = "Equippable by Fuuka">;
-    bool Akihiko : 1 <name = "Equippable by Akihiko">;
-    bool Ken : 1 <name = "Equippable by Ken">;
-    bool Shinjiro : 1 <name = "Equippable by Shinjiro">;
-    bool Koromaru : 1 <name = "Equippable by Koromaru">;
-    bool Femmc : 1 <name = "Equippable by Femmc">;
+    Bool Makoto : 1 <name = "Equippable by Makoto">;
+    Bool Yosuke : 1 <name = "Equippable by Yukari">;
+    Bool Aigis : 1 <name = "Equippable by Aigis">;
+    Bool Mitsuru : 1 <name = "Equippable by Mitsuru">;
+    Bool Junpei : 1 <name = "Equippable by Junpei">;
+    Bool Fuuka : 1 <name = "Equippable by Fuuka">;
+    Bool Akihiko : 1 <name = "Equippable by Akihiko">;
+    Bool Ken : 1 <name = "Equippable by Ken">;
+    Bool Shinjiro : 1 <name = "Equippable by Shinjiro">;
+    Bool Koromaru : 1 <name = "Equippable by Koromaru">;
+    Bool Femmc : 1 <name = "Equippable by Femmc">;
 } EquippableUsers <name = "Equippable User(s)"> ; 
 
 

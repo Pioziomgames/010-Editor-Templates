@@ -75,6 +75,46 @@ typedef struct {
     Vector4 row4;
 } Matrix4x4;
 
+typedef struct {
+    ubyte length;
+	char Value[length];
+} String8 <read=String8_String, optimize=false>;
+
+string String8_String(String8& input)
+{
+    return input.Value;
+}
+
+typedef struct {
+    ushort length;
+	char Value[length];
+} String16 <read=String16_String, optimize=false>;
+
+string String16_String(String16& input)
+{
+    return input.Value;
+}
+
+typedef struct {
+    uint length;
+	char Value[length];
+} String32 <read=String32_String, optimize=false>;
+
+string String32_String(String32& input)
+{
+    return input.Value;
+}
+
+typedef struct {
+    ulong length;
+	char Value[length];
+} String64 <read=String64_String, optimize=false>;
+
+string String64_String(String64& input)
+{
+    return input.Value;
+}
+
 //Functions
 
 void FAlign( uint value )

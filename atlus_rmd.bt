@@ -639,6 +639,10 @@ typedef struct (int VertexCount){
         int PrimitiveCount;
         RwMesh Meshes[MeshCount];
         break;
+    case RwUserData:
+        uint EntryCount;
+        struct RmdUserData UserData[EntryCount];
+        break;
     default:
         if (ChunkSize > 0) // Gets rid of array not generated warnings
             byte Data[ChunkSize];
@@ -699,6 +703,27 @@ typedef struct (RwWorldFormat FormatFlags) {
 
 } RwPlaneSectorNode <optimize=false>;
 
+typedef enum<uint> {
+    UserDataInt = 1,
+    UserDataFloat,
+    UserDataString,
+} RmdUserDataType;
+
+typedef struct {
+    String32 Name;
+    RmdUserDataType Type;
+    int Unk;
+    if (Type == UserDataFloat)
+        float Value;
+    else if (Type == UserDataString)
+    {
+        int ValueSize;
+        char Value[ValueSize];
+    }
+    else
+        int Value;
+} RmdUserData <optimize=false>;
+
 typedef struct {
     local int startPos = FTell() + 12;
     SetRandomBackColor();
@@ -709,7 +734,7 @@ typedef struct {
     {
 
     case RwExtension:
-        while (FTell() != ChunkSize + startPos)
+        while (FTell() < ChunkSize + startPos)
         {
            struct RmdChunk Chunk;
         }
@@ -816,15 +841,8 @@ typedef struct {
             FSkip(12);
             int TextureFlags;
     
-            int Unk1;
-            int NameSize;
-            int Unk3;
-            char TexName[NameSize];
-    
-            int Unk4;
-            int MaskNameSize;
-            int Unk6;
-            char TexMaskName[MaskNameSize];
+            struct RmdChunk TexName;
+            struct RmdChunk TexMaskName;
             
             struct RmdChunk TexExtension <name="TextureExtension">;
         }
@@ -967,6 +985,10 @@ typedef struct {
         int MeshCount;
         int PrimitiveCount;
         RwMesh Meshes[MeshCount];
+        break;
+    case RwUserData:
+        uint EntryCount;
+        RmdUserData UserData[EntryCount];
         break;
     default:
         if (ChunkSize > 0) // Gets rid of array not generated warnings

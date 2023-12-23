@@ -24,7 +24,7 @@ typedef enum
     UseMipMapCount = 0x20000,
     UseLinearSize = 0x80000,
     UseDepth = 0x800000,
-} DDSFlags <format=hex, read=DDSFlags_ToString>;
+} DDSFlags <format=binary, read=DDSFlags_ToString>;
 
 string DDSFlags_ToString(DDSFlags& val)
 {
@@ -54,10 +54,12 @@ typedef enum
     HasAlphaPixels = 0x1,
     HasAlpha = 0x2,
     HasFourCC = 0x4,
+    HasCLUT = 0x40,
     HasRGB = 0x40,
     HasYUV = 0x200,
+    HasPremultAlpha = 0x08000,
     HasLuminance = 0x20000,
-} DDSPixelFormatFlags <format=hex, read=DDSPixelFormatFlags_ToString>;
+} DDSPixelFormatFlags <format=binary, read=DDSPixelFormatFlags_ToString>;
 
 string DDSPixelFormatFlags_ToString(DDSPixelFormatFlags& val)
 {
@@ -73,6 +75,8 @@ string DDSPixelFormatFlags_ToString(DDSPixelFormatFlags& val)
         str += "HasRGB ";
     if ((val & HasYUV) == HasYUV)
         str += "HasYUV ";
+    if ((val & HasPremultAlpha) == HasPremultAlpha)
+        str += "HasPremultAlpha ";
     if ((val & HasLuminance) == HasLuminance)
         str += "HasLuminance ";
     return str;
@@ -95,7 +99,7 @@ typedef enum
     Complex = 0x8,
     Texture = 0x1000,
     MipMap =  0x400000,
-} DDSCaps <format=hex, read=DDSCaps_ToString>;
+} DDSCaps <format=binary, read=DDSCaps_ToString>;
 
 string DDSCaps_ToString(DDSCaps& val)
 {
@@ -120,7 +124,7 @@ typedef enum
     CubeMap_PositiveZ = 0x4000,
     CubeMap_NegativeZ = 0x8000,
     Volume = 0x200000
-} DDSCaps2 <format=hex, read=DDSCaps2_ToString>;
+} DDSCaps2 <format=binary, read=DDSCaps2_ToString>;
 
 string DDSCaps2_ToString(DDSCaps2& val)
 {
@@ -289,7 +293,6 @@ typedef struct
 
 typedef struct
 {
-    char MAGIC[4] <bgcolor=cRed>;
     uint Size;
     DDSFlags Flags;
     uint Height;
@@ -305,11 +308,6 @@ typedef struct
     uint Caps3;
     uint Caps4;
     ubyte Reserved2[4] <bgcolor=cGray>;
-
-    if (PixelFormat.FourCC == "DX10")
-    {
-        DDSHeaderDXT10 Dxt10Header;
-    }
 } DDSHeader <bgcolor=cGreen>;
 
 typedef struct(uint Size)
@@ -319,8 +317,15 @@ typedef struct(uint Size)
 
 struct
 {
+    char MAGIC[4] <bgcolor=cRed>;
     DDSHeader Header;
-    if (Header.PixelFormat.FourCC == "\0\0\0\0")
+
+    
+    if (Header.PixelFormat.FourCC == "DX10")
+    {
+        DDSHeaderDXT10 Dxt10Header;
+    }
+    else if (Header.PixelFormat.FourCC == "\0\0\0\0")
     {
         ubyte UncompressedImageData[(Header.PixelFormat.RGBBitCount/8)*Header.Width*Header.Height] <bgcolor=cYellow>;
 

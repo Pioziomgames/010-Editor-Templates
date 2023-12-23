@@ -1,0 +1,52 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Touhou (for now only 6) compressed archive files
+//   Authors: Pioziomgames
+//   Version: 0.2
+//   Purpose: 
+//  Category: 
+// File Mask: *.dat
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef enum<uint> {
+    Bits8,
+    Bits16,
+    Bits24,
+    Bits32,
+} IntSize;
+
+
+typedef struct {
+    IntSize Size : 2;
+    if (Size == 0)
+        uint Value : 8;
+    else if (Size == 1)
+        uint Value : 16;
+    else if (Size == 2)
+        uint Value : 24;
+    else if (Size == 3)
+        uint Value : 32;
+} DatInt;
+
+typedef struct {
+    DatInt Unk1;
+    DatInt Unk2;
+    DatInt Extra;
+    DatInt Offset;
+    DatInt Size;
+    string Name;
+} DatEntry;
+
+
+struct
+{
+    uint Magic <bgcolor=cRed>;
+    BitfieldDisablePadding();
+    DatInt EntryCount;
+    DatInt Offset;
+    FSeek(Offset.Value);
+    DatEntry Entries[EntryCount.Value];
+} DatFile <optimize = false>;
