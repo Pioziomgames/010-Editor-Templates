@@ -1,0 +1,246 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: PS4 texture files
+//   Authors: Pioziomgames
+//   Version: 0.5
+//   Purpose: 
+//  Category: Textures
+// File Mask: *.gnf
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+enum<uint> SurfaceFormats
+{
+    Invalid = 0x00000000,
+    Format8 = 0x00000001,
+    Format16 = 0x00000002,
+    Format8_8 = 0x00000003,
+    Format32 = 0x00000004,
+    Format16_16 = 0x00000005,
+    Format10_11_11 = 0x00000006,
+    Format11_11_10 = 0x00000007,
+    Format10_10_10_2 = 0x00000008,
+    Format2_10_10_10 = 0x00000009,
+    Format8_8_8_8 = 0x0000000a,
+    Format32_32 = 0x0000000b,
+    Format16_16_16_16 = 0x0000000c,
+    Format32_32_32 = 0x0000000d,
+    Format32_32_32_32 = 0x0000000e,
+    Format5_6_5 = 0x00000010,
+    Format1_5_5_5 = 0x00000011,
+    Format5_5_5_1 = 0x00000012,
+    Format4_4_4_4 = 0x00000013,
+    Format8_24 = 0x00000014,
+    Format24_8 = 0x00000015,
+    FormatX24_8_32 = 0x00000016,
+    GB_GR = 0x00000020,
+    BG_RG = 0x00000021,
+    Format5_9_9_9 = 0x00000022,
+    BC1 = 0x00000023,
+    BC2 = 0x00000024,
+    BC3 = 0x00000025,
+    BC4 = 0x00000026,
+    BC5 = 0x00000027,
+    BC6 = 0x00000028,
+    BC7 = 0x00000029,
+    Fmask8_S2_F1 = 0x0000002C,
+    Fmask8_S4_F1 = 0x0000002D,
+    Fmask8_S8_F1 = 0x0000002E,
+    Fmask8_S2_F2 = 0x0000002F,
+    Fmask8_S4_F2 = 0x00000030,
+    Fmask8_S4_F4 = 0x00000031,
+    Fmask16_S16_F1 = 0x00000032,
+    Fmask16_S8_F2 = 0x00000033,
+    Fmask32_S16_F2 = 0x00000034,
+    Fmask32_S8_F4 = 0x00000035,
+    Fmask32_S8_F8 = 0x00000036,
+    Fmask64_S16_F4 = 0x00000037,
+    Fmask64_S16_F8 = 0x00000038,
+    Format4_4 = 0x00000039,
+    Format6_5_5 = 0x0000003A,
+    Format1 = 0x0000003B,
+    Format1Reversed = 0x0000003C,
+};
+
+enum<uint> ChannelTypes
+{
+    UNorm = 0x00000000,
+    SNorm = 0x00000001,
+    UScaled = 0x00000002,
+    SScaled = 0x00000003,
+    UInt = 0x00000004,
+    SInt = 0x00000005,
+    SNormNoZero = 0x00000006,
+    Float = 0x00000007,
+    Srgb = 0x00000009,
+    UBNorm = 0x0000000A,
+    UBNormNoZero = 0x0000000B,
+    UBInt = 0x0000000C,
+    UBScaled = 0x0000000D,
+};
+
+typedef struct
+{
+    uint Unused : 8 <hidden=true>;
+    uint MinLodClamp : 12;
+    SurfaceFormats SurfaceFormat : 6;
+    ChannelTypes ChannelType : 4;
+} Flags2;
+
+enum<uint> SamplerModulationFactors
+{
+    Factor0_0000 = 0x0,
+    Factor0_1250 = 0x1,
+    Factor0_3125 = 0x2,
+    Factor0_4375 = 0x3,
+    Factor0_5625 = 0x4,
+    Factor0_6875 = 0x5,
+    Factor0_8750 = 0x6,
+    Factor1_0000 = 0x7,
+};
+
+typedef struct
+{
+    uint Width : 14 <read=Plus1_Read, write=Plus1_Write>;
+    uint Height : 14 <read=Plus1_Read, write=Plus1_Write>;
+    SamplerModulationFactors SamplerModulationFactor : 3;
+} Flags3;
+
+string Plus1_Read(uint& input)
+{
+    string s;
+    SPrintf( s, "%d", input+1 );
+    return s;
+}
+
+void Plus1_Write(uint& f, string s )
+{
+    f = Atoi(s)-1;
+}
+
+enum<uint>ChannelOrder
+{
+    Constant0 = 0,
+    Constant1 = 1,
+    X = 4,
+    Y = 5,
+    Z = 6,
+    W = 7,
+};
+
+enum<uint> TileModes
+{
+    Depth_2DThin64 = 0x00000000,
+    Depth_2DThin128 = 0x00000001,
+    Depth_2DThin256 = 0x00000002,
+    Depth_2DThin512 = 0x00000003,
+    Depth_2DThin_1K = 0x00000004,
+    Depth_1DThin = 0x00000005,
+    Depth_2DThinPrt_256 = 0x00000006,
+    Depth_2DThinPrt_1K = 0x00000007,
+    Display_LinearAligned = 0x00000008,
+    Display_1DThin = 0x00000009,
+    Display_2DThin = 0x0000000A,
+    Display_ThinPrt = 0x0000000B,
+    Display_2DThinPrt = 0x0000000C,
+    Thin_1DThin = 0x0000000D,
+    Thin_2DThin = 0x0000000E,
+    Thin_3DThin = 0x0000000F,
+    Thin_ThinPrt = 0x00000010,
+    Thin_2DThinPrt = 0x00000011,
+    Thin_3DThinPrt = 0x00000012,
+    Thick_1DThick = 0x00000013,
+    Thick_2DThick = 0x00000014,
+    Thick_3DThick = 0x00000015,
+    Thick_ThickPrt = 0x00000016,
+    Thick_2DThickPrt = 0x00000017,
+    Thick_3DThickPrt = 0x00000018,
+    Thick_2DXThick = 0x00000019,
+    Thick_3DXThick = 0x0000001A,
+    Display_LinearGeneral = 0x0000001F,
+};
+
+enum<uint> TextureTypes
+{
+    Type1D = 0x00000008,
+    Type2D = 0x00000009,
+    Type3D = 0x0000000A,
+    Cubemap = 0x0000000B,
+    Type1DArray = 0x0000000C,
+    Type2DArray = 0x0000000D,
+    Type2DMsaa = 0x0000000E,
+    Type2DArrayMsaa = 0x0000000F 
+};
+
+typedef struct
+{
+    ChannelOrder ChannelOrderX : 3;
+    ChannelOrder ChannelOrderY : 3;
+    ChannelOrder ChannelOrderZ : 3;
+    ChannelOrder ChannelOrderW : 3;
+    uint BaseMipLevel : 4;
+    uint LastMipLevel : 4;
+    TileModes TileMode : 5;
+    uint IsPaddedToPow2 : 1;
+    uint Unused : 2 <hidden=true>;
+    TextureTypes TextureType : 4;
+} Flags4;
+
+typedef struct
+{
+    uint Depth : 13 <read=Plus1_Read, write=Plus1_Write>;;
+    uint Pitch : 14 <read=Plus1_Read, write=Plus1_Write>;;
+} Flags5;
+
+typedef struct
+{
+    uint BaseArraySliceIndex : 13;
+    uint LastArraySliceIndex : 18;
+} Flags6;
+
+typedef struct
+{
+    uint MinLodWarning : 12;
+    uint MipStatsCounterIndex : 8;
+    uint MipStatsEnabled : 1;
+    uint MetadataCompressionEnabled : 1;
+    uint DccAlphaOnMsb : 1;
+    uint DccColorTransform : 1;
+    uint UseAltTileMode : 1;
+} Flags7;
+
+typedef struct
+{
+    uint flags1;
+    Flags2 flags2;
+    Flags3 flags3;
+    Flags4 flags4;
+    Flags5 flags5;
+    Flags6 flags6;
+    Flags7 flags7;
+} TextureInfo;
+
+typedef struct
+{
+    int MAGIC;
+    Assert(MAGIC == 0x20464E47);
+    uint HeaderSize;
+    ubyte Version;
+    ubyte TextureCount;
+    ubyte Alignment;
+    ubyte Padding;
+    uint FileSize;
+    TextureInfo Info;
+    uint ImageSize;
+} GnfHeader <bgcolor=cBlue>;
+
+struct
+{
+    GnfHeader Header;
+
+    FSeek(Header.HeaderSize+8);
+
+    byte ImageData[Header.ImageSize] <bgcolor=cRed>;
+} GNFFile;

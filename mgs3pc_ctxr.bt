@@ -1,0 +1,58 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: MGS3 PC ctxr texture files
+//   Authors: Pioziomgames
+//   Version: 0.9
+//   Purpose: 
+//  Category: Textures
+// File Mask: *.ctxr
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "include/common.bt"
+
+typedef struct 
+{
+    SetRandomBackColor();
+    uint ChunkSize;
+    ubyte ChunkData[ChunkSize];
+    FAlign(32);
+} CtxrMipMap <optimize=false>;
+
+typedef struct 
+{
+    SetRandomBackColor();
+    BigEndian();
+    char MAGIC[4];
+    uint Version;
+    ushort Width;
+    ushort Height;
+    ushort Field01; //it's labeled as depth in CtxrTool
+    //but never actually used for anything so idk
+    ushort Field02; //Every FieldXX without a comment
+        //seems to always be set to 0
+    ushort Field03; //Always 1
+    ubyte Field04;
+
+    ushort Field05;
+    ushort Field06;
+
+    uint ColorMin;
+    uint ColorMax;
+
+    ushort ColorDataEnd;
+    ushort Field11;
+    ushort Field12;
+    ushort MipMapCount;
+    FAlign(128);
+
+    if (MipMapCount > 1)
+        CtxrMipMap MipMapData[MipMapCount];
+    else
+        CtxrMipMap ImageData;
+} CtxrFile <optimize=false>;
+
+
+CtxrFile File;

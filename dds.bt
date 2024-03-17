@@ -3,7 +3,7 @@
 //
 //      File: DirectDraw Surface Texture
 //   Authors: Pio
-//   Version: 0.1 (very unfinished for now)
+//   Version: 0.5
 //   Purpose: Parse DDS files
 //  Category: Textures
 // File Mask: *.dds
@@ -315,20 +315,391 @@ typedef struct(uint Size)
     ubyte Data[Size];
 } mipMapData;
 
+typedef struct
+{
+    ubyte Texel0 : 2;
+    ubyte Texel1 : 2;
+    ubyte Texel2 : 2;
+    ubyte Texel3 : 2;
+} Bc1Texel <optimize=false>;
+
+typedef struct
+{
+    ubyte Texel0 : 4;
+    ubyte Texel1 : 4;
+    ubyte Texel2 : 4;
+    ubyte Texel3 : 4;
+} Bc2Texel <optimize=false>;
+
+typedef struct
+{
+    ColorBGR565 color0;
+    ColorBGR565 color1;
+    Bc1Texel Texel0;
+    Bc1Texel Texel1;
+    Bc1Texel Texel2;
+    Bc1Texel Texel3;
+} Bc1Block <optimize=false>;
+
+typedef struct(uint width, uint height)
+{
+    local uint blockCountX = (width + 3) / 4;
+    local uint blockCountY = (height + 3) / 4;
+    Bc1Block Blocks[blockCountY * blockCountX];
+} Bc1Image;
+
+typedef struct
+{
+    Bc1Block ColorData;
+    
+    Bc2Texel Alpha0;
+    Bc2Texel Alpha1;
+    Bc2Texel Alpha2;
+    Bc2Texel Alpha3;
+} Bc2Block <optimize=false>;
+
+typedef struct(uint width, uint height)
+{
+    local uint blockCountX = (width + 3) / 4;
+    local uint blockCountY = (height + 3) / 4;
+    Bc2Block Blocks[blockCountY * blockCountX];
+} Bc2Image;
+
+typedef struct
+{
+    ubyte Channel0;
+    ubyte Channel;
+    
+    BitfieldDisablePadding();
+    ubyte ChannelValue0 : 3;
+    ubyte ChannelValue1 : 3;
+    ubyte ChannelValue2 : 3;
+    ubyte ChannelValue3 : 3;
+    ubyte ChannelValue4 : 3;
+    ubyte ChannelValue5 : 3;
+    ubyte ChannelValue6 : 3;
+    ubyte ChannelValue7 : 3;
+    ubyte ChannelValue8 : 3;
+    ubyte ChannelValue9 : 3;
+    ubyte ChannelValue10 : 3;
+    ubyte ChannelValue11 : 3;
+    ubyte ChannelValue12 : 3;
+    ubyte ChannelValue13 : 3;
+    ubyte ChannelValue14 : 3;
+    ubyte ChannelValue15 : 3;
+} Bc4Block;
+
+typedef struct
+{
+    Bc1Block ColorData;
+    Bc4Block AlphaData;
+    
+} Bc3Block <optimize=false>;
+
+typedef struct(uint width, uint height)
+{
+    local uint blockCountX = (width + 3) / 4;
+    local uint blockCountY = (height + 3) / 4;
+    Bc3Block Blocks[blockCountY * blockCountX];
+} Bc3Image;
+
+typedef struct(uint width, uint height)
+{
+    local uint blockCountX = (width + 3) / 4;
+    local uint blockCountY = (height + 3) / 4;
+    Bc4Block Blocks[blockCountY * blockCountX];
+} Bc4Image;
+
+typedef struct
+{
+    BitfieldDisablePadding();
+    ulong Mode0 : 1 <format=binary>;
+    ulong partition : 4;
+    ulong R0 : 4; //arrays with bitfields are not allowed
+    ulong R1 : 4;
+    ulong R2 : 4;
+    ulong R3 : 4;
+    ulong R4 : 4;
+    ulong R5 : 4;
+
+    ulong G0 : 4;
+    ulong G1 : 4;
+    ulong G2 : 4;
+    ulong G3 : 4;
+    ulong G4 : 4;
+    ulong G5 : 4;
+
+    ulong B0 : 4;
+    ulong B1 : 4;
+    ulong B2 : 4;
+    ulong B3 : 4;
+    ulong B4 : 4;
+    ulong B5 : 4;
+
+    ulong p0 : 1;
+    ulong p1 : 1;
+    ulong p2 : 1;
+    ulong p3 : 1;
+    ulong p4 : 1;
+    ulong p5 : 1;
+    ulong index : 32; //bitfields bigger than 32 are not allowed
+    ulong index : 13; //:(
+} Bc7Mode0Block;
+
+typedef struct
+{
+    BitfieldDisablePadding();
+    ulong Mode1 : 2 <format=binary>;
+    ulong partition : 6;
+    ulong R0 : 6;
+    ulong R1 : 6;
+    ulong R2 : 6;
+    ulong R3 : 6;
+
+    ulong G0 : 6;
+    ulong G1 : 6;
+    ulong G2 : 6;
+    ulong G3 : 6;
+
+    ulong B0 : 6;
+    ulong B1 : 6;
+    ulong B2 : 6;
+    ulong B3 : 6;
+
+    ulong p0 : 1;
+    ulong p1 : 1;
+    ulong index : 32;
+    ulong index : 14;
+} Bc7Mode1Block;
+
+typedef struct
+{
+    BitfieldDisablePadding();
+    ulong Mode2 : 3 <format=binary>;
+    ulong partition : 6;
+    ulong R0 : 6;
+    ulong R1 : 6;
+    ulong R2 : 6;
+    ulong R3 : 6;
+    ulong R4 : 6;
+
+    ulong G0 : 6;
+    ulong G1 : 6;
+    ulong G2 : 6;
+    ulong G3 : 6;
+    ulong G4 : 6;
+
+    ulong B0 : 6;
+    ulong B1 : 6;
+    ulong B2 : 6;
+    ulong B3 : 6;
+    ulong B4 : 6;
+    ulong index : 29;
+} Bc7Mode2Block;
+
+typedef struct
+{
+    BitfieldDisablePadding();
+    ulong Mode3 : 4 <format=binary>;
+    ulong partition : 6;
+    ulong R0 : 7;
+    ulong R1 : 7;
+    ulong R2 : 7;
+    ulong R3 : 7;
+
+    ulong G0 : 7;
+    ulong G1 : 7;
+    ulong G2 : 7;
+    ulong G3 : 7;
+
+    ulong B0 : 7;
+    ulong B1 : 7;
+    ulong B2 : 7;
+    ulong B3 : 7;
+
+    ulong p0 : 1;
+    ulong p1 : 1;
+    ulong p2 : 1;
+    ulong p3 : 1;
+    ulong index : 30;
+} Bc7Mode3Block;
+
+typedef struct
+{
+    BitfieldDisablePadding();
+    ulong Mode4 : 5 <format=binary>;
+    ulong rotation : 2;
+    ulong idxMode : 1;
+    ulong R0 : 5;
+    ulong R1 : 5;
+
+    ulong G0 : 5;
+    ulong G1 : 5;
+
+    ulong B0 : 5;
+    ulong B1 : 5;
+
+    ulong A0 : 6;
+    ulong A1 : 6;
+    ulong colorIndex : 31;
+    ulong alphaIndex : 32;
+    ulong alphaIndex : 15;
+} Bc7Mode4Block;
+
+typedef struct
+{
+    BitfieldDisablePadding();
+    ulong Mode5 : 6 <format=binary>;
+    ulong rotation : 2;
+    ulong R0 : 7;
+    ulong R1 : 7;
+
+    ulong G0 : 7;
+    ulong G1 : 7;
+
+    ulong B0 : 7;
+    ulong B1 : 7;
+
+    ulong A0 : 8;
+    ulong A1 : 8;
+    ulong colorIndex : 31;
+    ulong alphaIndex : 31;
+} Bc7Mode5Block;
+
+typedef struct
+{
+    BitfieldDisablePadding();
+    ulong Mode6 : 7 <format=binary>;
+    ulong R0 : 7;
+    ulong R1 : 7;
+
+    ulong G0 : 7;
+    ulong G1 : 7;
+
+    ulong B0 : 7;
+    ulong B1 : 7;
+
+    ulong A0 : 7;
+    ulong A1 : 7;
+
+    ulong p0 : 2;
+    ulong p1 : 2;
+    ulong index : 32;
+    ulong index : 31;
+} Bc7Mode6Block;
+
+typedef struct
+{
+    BitfieldDisablePadding();
+    ulong Mode7 <format=binary>;
+    ulong partition : 6;
+    ulong R0 : 5;
+    ulong R1 : 5;
+
+    ulong G0 : 5;
+    ulong G1 : 5;
+
+    ulong B0 : 5;
+    ulong B1 : 5;
+
+    ulong A0 : 5;
+    ulong A1 : 5;
+
+    ulong p0 : 1;
+    ulong p1 : 1;
+    ulong p2 : 1;
+    ulong p3 : 1;
+    ulong index : 30;
+} Bc7Mode7Block;
+
+typedef struct
+{
+    ubyte Mode8 <format=binary>;
+    ubyte Mode8DummyData[15];
+} Bc7Mode8Block;
+
+typedef struct
+{
+    local ubyte testMode = ReadUByte();
+    local ubyte mode = 0;
+    if (testMode == 0)
+        mode = 8;
+    else
+    {
+        while((testMode & 1) == 0)
+        {
+            mode++;
+            testMode >>= 1;
+        }
+    }
+    if (mode == 0)
+        Bc7Mode0Block Mode0Block;
+    else if (mode == 1)
+        Bc7Mode1Block Mode1Block;
+    else if (mode == 2)
+        Bc7Mode2Block Mode2Block;
+    else if (mode == 3)
+        Bc7Mode3Block Mode3Block;
+    else if (mode == 4)
+        Bc7Mode4Block Mode4Block;
+    else if (mode == 5)
+        Bc7Mode5Block Mode5Block;
+    else if (mode == 6)
+        Bc7Mode6Block Mode6Block;
+    else if (mode == 7)
+        Bc7Mode7Block Mode7Block;
+    else if (mode == 8)
+        Bc7Mode8Block Mode8Block;
+} Bc7Block <optimize=false>;
+
+typedef struct(uint width, uint height)
+{
+    local uint blockCountX = (width + 3) / 4;
+    local uint blockCountY = (height + 3) / 4;
+    Bc7Block Blocks[blockCountY * blockCountX];
+} Bc7Image;
+
 struct
 {
     char MAGIC[4] <bgcolor=cRed>;
     DDSHeader Header;
 
     
+    SetRandomBackColor();
     if (Header.PixelFormat.FourCC == "DX10")
     {
         DDSHeaderDXT10 Dxt10Header;
-    }
-    else if (Header.PixelFormat.FourCC == "\0\0\0\0")
-    {
-        ubyte UncompressedImageData[(Header.PixelFormat.RGBBitCount/8)*Header.Width*Header.Height] <bgcolor=cYellow>;
+        local int f = -1;
+        if (Dxt10Header.DxgiFormat == DXGI_FORMAT_BC1_UNORM ||
+            Dxt10Header.DxgiFormat == DXGI_FORMAT_BC1_TYPELESS ||
+            Dxt10Header.DxgiFormat == DXGI_FORMAT_BC1_UNORM_SRGB)
+                f = 1;
+        else if (Dxt10Header.DxgiFormat == DXGI_FORMAT_BC2_UNORM ||
+            Dxt10Header.DxgiFormat == DXGI_FORMAT_BC2_TYPELESS ||
+            Dxt10Header.DxgiFormat == DXGI_FORMAT_BC2_UNORM_SRGB)
+                f = 2;
+        else if (Dxt10Header.DxgiFormat == DXGI_FORMAT_BC3_UNORM ||
+            Dxt10Header.DxgiFormat == DXGI_FORMAT_BC3_TYPELESS ||
+            Dxt10Header.DxgiFormat == DXGI_FORMAT_BC3_UNORM_SRGB)
+                f = 3;
+        else if (Dxt10Header.DxgiFormat == DXGI_FORMAT_BC4_UNORM ||
+            Dxt10Header.DxgiFormat == DXGI_FORMAT_BC4_SNORM ||
+            Dxt10Header.DxgiFormat == DXGI_FORMAT_BC4_TYPELESS)
+                f = 4;
+        else if (Dxt10Header.DxgiFormat == DXGI_FORMAT_BC7_UNORM ||
+            Dxt10Header.DxgiFormat == DXGI_FORMAT_BC7_UNORM_SRGB)
+                f = 7;
 
+        if (f == 1)
+            Bc1Image ImageData(Header.Width, Header.Height);
+        else if (f == 2)
+            Bc2Image ImageData(Header.Width, Header.Height);
+        else if (f == 3)
+            Bc3Image ImageData(Header.Width, Header.Height);
+        else if (f == 4)
+            Bc4Image ImageData(Header.Width, Header.Height);
+        else if (f == 7)
+            Bc7Image  ImageData(Header.Width, Header.Height);
         local uint MipWidth;
         local uint MipHeight;
         local int i = 1;
@@ -337,9 +708,49 @@ struct
             SetRandomBackColor();
             MipWidth = Header.Width >> i;
             MipHeight = Header.Height >> i;
-            //ubyte MipMapData[(Header.PixelFormat.RGBBitCount/8)*MipWidth*MipHeight];
-            mipMapData MipMapData((Header.PixelFormat.RGBBitCount/8)*MipWidth*MipHeight);
-            i++;
+            if (f == 1)
+                Bc1Image ImageData(MipWidth, MipHeight);
+            else if (f == 4)
+                Bc4Image ImageData(MipWidth, MipHeight);
+            else if (f == 7)
+                Bc7Image  ImageData(MipWidth, MipHeight);
+        }
+    }
+    else
+    {
+        if (Header.PixelFormat.FourCC == "\0\0\0\0")
+            ubyte UncompressedImageData[(Header.PixelFormat.RGBBitCount/8)*Header.Width*Header.Height];
+        else if (Header.PixelFormat.FourCC == "DXT1")
+            Bc1Image ImageData(Header.Width, Header.Height);
+        else if (Header.PixelFormat.FourCC == "DXT3" || Header.PixelFormat.FourCC == "DXT2")
+            Bc2Image ImageData(Header.Width, Header.Height);
+        else if (Header.PixelFormat.FourCC == "DXT5" || Header.PixelFormat.FourCC == "DXT4")
+            Bc3Image ImageData(Header.Width, Header.Height);
+        else if (Header.PixelFormat.FourCC == "ATI1" || Header.PixelFormat.FourCC == "BC4U" || Header.PixelFormat.FourCC == "BC4S")
+            Bc4Image ImageData(Header.Width, Header.Height);
+        else if (Header.PixelFormat.FourCC == "BC7\0" || Header.PixelFormat.FourCC == "BC7U")
+            Bc7Image ImageData(Header.Width, Header.Height);
+        
+        local uint MipWidth;
+        local uint MipHeight;
+        local int i = 1;
+        while ( i < Header.MipMapCount)
+        {
+            SetRandomBackColor();
+            MipWidth = Header.Width >> i;
+            MipHeight = Header.Height >> i;
+            if (Header.PixelFormat.FourCC == "\0\0\0\0")
+                mipMapData MipMapData((Header.PixelFormat.RGBBitCount/8)*MipWidth*MipHeight);
+            if (Header.PixelFormat.FourCC == "DXT1")
+                Bc1Image MipMapData(MipWidth, MipHeight);
+            else if (Header.PixelFormat.FourCC == "DXT3" || Header.PixelFormat.FourCC == "DXT2")
+                Bc2Image MipMapData(MipWidth, MipHeight);
+            else if (Header.PixelFormat.FourCC == "DXT5" || Header.PixelFormat.FourCC == "DXT4")
+                Bc3Image ImageData(MipWidth, MipHeight);
+            else if (Header.PixelFormat.FourCC == "ATI1" || Header.PixelFormat.FourCC == "BC4U" || Header.PixelFormat.FourCC == "BC4S")
+                Bc4Image ImageData(MipWidth, MipHeight);
+            else if (Header.PixelFormat.FourCC == "BC7\0" || Header.PixelFormat.FourCC == "BC7U")
+                Bc7Image ImageData(MipWidth, MipHeight);
         }
     }
 } DDSFile;

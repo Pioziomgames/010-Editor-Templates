@@ -117,15 +117,23 @@ typedef struct {
     
     FAlign(128);
 
-    ImageData Image((uint)Width * Height, PixelFormat);
-    
     if (MipMapCount > 1)
     {
-        Assert(false, "MipMaps not supported");
-        int GsMiptbp1[2];
-        int GsMiptbp2[2];
-        int Sizes[8];
+        local int i = 0;
+        local int mipWidth = 0;
+        local int mipHeight = 0;
+        while ( i < MipMapCount)
+        {
+            mipWidth = (Width >> i);
+            if (mipWidth < 1) mipWidth = 1;
+            mipHeight = (Height >> i);
+            if (mipWidth < 1) mipHeight = 1;
+            ImageData MipMap((uint)mipWidth * mipHeight, PixelFormat);
+            i++;
+        }
     }
+    else
+        ImageData Image((uint)Width * Height, PixelFormat);
 
     FAlign(128);
 

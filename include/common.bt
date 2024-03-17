@@ -9,6 +9,33 @@ enum<byte>Bool
 
 typedef struct
 {
+    ushort B : 5;
+    ushort G : 6;
+    ushort R : 5;
+    local string ToString;
+    SPrintf(ToString, "(%d,%d,%d)", R, G, B);
+} ColorBGR565 <read=ColorBGR565_String, optimize=false>;
+
+string ColorBGR565_String(ColorBGR565& input)
+{
+    return input.ToString;
+}
+
+typedef struct
+{
+    hfloat U;
+    hfloat V;
+    local string ToString;
+    SPrintf(ToString, "(%f,%f)", U, V);
+} HVector2 <read=HVector2_String, optimize=false>;
+
+string HVector2_String(HVector2& input)
+{
+    return input.ToString;
+}
+
+typedef struct
+{
     float U;
     float V;
     local string ToString;
@@ -36,6 +63,20 @@ string Vector3_String(Vector3& input)
 
 typedef struct
 {
+    hfloat X;
+    hfloat Y;
+    hfloat Z;
+    local string ToString;
+    SPrintf(ToString, "(%f,%f,%f)", X, Y, Z);
+} HVector3 <read=HVector3_String, optimize=false>;
+
+string HVector3_String(HVector3& input)
+{
+    return input.ToString;
+}
+
+typedef struct
+{
     float X;
     float Y;
     float Z;
@@ -45,6 +86,21 @@ typedef struct
 } Vector4 <read=Vector4_String, optimize=false>;
 
 string Vector4_String(Vector4& input)
+{
+    return input.ToString;
+}
+
+typedef struct
+{
+    hfloat X;
+    hfloat Y;
+    hfloat Z;
+    hfloat W;
+    local string ToString;
+    SPrintf(ToString, "(%f,%f,%f,%f)", X, Y, Z, W);
+} HVector4 <read=HVector4_String, optimize=false>;
+
+string HVector4_String(HVector4& input)
 {
     return input.ToString;
 }

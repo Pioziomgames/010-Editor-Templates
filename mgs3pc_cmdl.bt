@@ -1,0 +1,163 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: MGS3 PC cmdl model files
+//   Authors: Pioziomgames
+//   Version: 0.5
+//   Purpose: 
+//  Category: Models
+// File Mask: *.cmdl
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "include/common.bt"
+
+typedef struct (int VertexCount)
+{
+    Vector4 Vertex[VertexCount];
+} VertexData <optimize=false>;
+
+typedef struct (int VertexCount)
+{
+    HVector2 UV[VertexCount];
+} UVData <optimize=false>;
+
+typedef struct {
+    BitfieldDisablePadding();
+    uint NrmX : 11;
+    uint NrmY : 11;
+    uint NrmZ : 10;
+} Normal <optimize=false>;
+
+typedef struct (int VertexCount)
+{
+    Normal Normals[VertexCount];
+} NormalData <optimize=false>;
+
+typedef struct {
+    ubyte Bone0;
+    ubyte Bone1;
+    ubyte Bone2;
+    ubyte Bone3;
+} VertexBoneIndex <optimize=false>;
+
+typedef struct (int VertexCount)
+{
+    VertexBoneIndex Indexes[VertexCount];
+} BoneIndexData <optimize=false>;
+
+typedef struct (int VertexCount)
+{
+    HVector4 Weights[VertexCount];
+} BoneWeightData <optimize=false>;
+
+typedef struct
+{
+    SetRandomBackColor();
+    char ChunkName[4];
+    ushort ChunkId;
+    ushort Unk2; //Possibly alignment??
+    uint ChunkOffset;
+    FSkip(4);
+    uint ChunkSize;
+    FSkip(12);
+    local ulong cur = FTell();
+
+    local string ToString;
+    SPrintf(ToString, "(%s: %i - %i)", ChunkName, ChunkId, Unk2);
+    
+    FSeek(ChunkOffset + 12);
+    switch (ChunkId)
+    {
+        case 2:
+            VertexData Vertices(ChunkSize / 16);
+            break;
+        case 4:
+            BoneIndexData BoneIndexes(ChunkSize / 4);
+            break;
+        case 6:
+            BoneWeightData BoneWeights(ChunkSize / 8);
+            break;
+        case 5:
+            UVData UVs(ChunkSize / 4);
+            break;
+        case 9:
+            NormalData Normals(ChunkSize / 2);
+            break;
+        //case 10:
+         //I've got no idea what this is
+         //It's clearly a list of ints most likely indexes of
+         //some sort but I've got no idea what they could be for
+ 
+        //I also observed 0LOC (it used the same id as
+        //bone weights and the entire data was just 1,0,0,0 repeating)
+        default:
+            ubyte ChunkData[ChunkSize];
+            break;
+    }
+    FSeek(cur);
+} Chunk <read=Chunk_String, optimize=false>;
+
+string Chunk_String(Chunk& input)
+{
+    return input.ToString;
+}
+
+typedef struct
+{
+    SetRandomBackColor();
+    uint FaceCount;
+    uint FaceStripData[FaceCount+2];
+} FaceData <optimize=false>;
+
+typedef struct
+{
+    BigEndian();
+    SetRandomBackColor();
+    Vector3 BoundingBoxBottom;
+    Vector3 BoundingBoxTop;
+    SetRandomBackColor();
+    short MinusOne;
+    uint Unk0;
+    SetRandomBackColor();
+    float Unk1[4];
+    uint One;
+    ubyte pad;
+    SetRandomBackColor();
+    ubyte Half[8];
+    SetRandomBackColor();
+    ubyte Empty[4];
+    uint GroupIndex;
+    uint Index;
+} BoneData <optimize=false>;
+//Not even sure if this is bone data anymore
+
+typedef struct 
+{
+    SetRandomBackColor();
+    BigEndian();
+    char MAGIC[4];
+    uint Version;
+    uint FaceDataOffset;
+    LittleEndian();
+    
+    SetRandomBackColor();
+    uint ChunkCount;
+    Chunk Chunks[ChunkCount];
+
+    BigEndian();
+    FSeek(FaceDataOffset + 12);
+    FaceData Faces;
+
+    //The size of the data after faces changes in different
+    //files so I removed it completly until I can figure out
+    //based on what
+    //while(!FEof())
+    //{
+    //    BoneData Bone;
+    //}
+} CmdlFile;
+
+
+CmdlFile File;
