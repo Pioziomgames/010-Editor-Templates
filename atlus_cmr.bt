@@ -40,7 +40,7 @@ struct
     float RotationX; 
     float RotationY;
     float RotationZ;
-    int Unk15;
+    float Unk15;
     float PosX;
     float PosY;
     float PosZ;

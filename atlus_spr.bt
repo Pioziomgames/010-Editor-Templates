@@ -1,0 +1,83 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "include/common.bt"
+
+typedef struct
+{
+    ushort flags;
+    ushort userId;
+    int reserved;
+    uint MAGIC;
+    Assert(MAGIC == 0x30525053);
+    uint HeaderSize;
+    uint FileSize;
+    ushort TextureCount;
+    ushort SpriteCount;
+    uint TexturesOffset;
+    uint SpritesOffset;
+} SprHeader;
+
+typedef struct
+{
+    SetRandomBackColor();
+    uint Id;
+    uint Offset;
+    local long curOff = FTell();
+    FSeek(Offset);
+    #include "atlus_tmx.bt"
+    FSeek(curOff);
+} SprTexture <optimize=false>;
+
+
+typedef struct
+{
+    int Unk1;
+    char Comment[16];
+    int TextureId;
+    byte Unk3[44];
+    int XOffset;
+    int XOffset;
+    int Unk4;
+    int Unk5;
+    int X1;
+    int Y1;
+    int X2;
+    int Y2;
+    int Color1;
+    int Color2;
+    int Color3;
+    int Color4;
+} SprSpriteEntry <optimize=false>;
+
+typedef struct 
+{
+    SetRandomBackColor();
+    uint Unk;
+    uint Offset;
+    local long curOff = FTell();
+    FSeek(Offset);
+    SprSpriteEntry Sprite;
+    FSeek(curOff);
+} SprSprite <optimize=false>;
+
+typedef struct 
+{
+    SetRandomBackColor();
+    SprHeader Header;
+    SprTexture Texture[Header.TextureCount];
+    SprSprite Sprite[Header.SpriteCount];
+} SprFile;
+
+
+SprFile File;

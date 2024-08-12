@@ -1,0 +1,51 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: P4G dungeon map definition
+//   Authors: Pioziomgames
+//   Version: 0.5
+//   Purpose: Editing/Analyzing dungeon layouts
+//  Category: Dungeon
+// File Mask: *.map
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//Based on the p3f template without any testing because
+//I don't actually know where these files are used in p4
+
+typedef struct {
+    uint Unused; //Space for the the id that's on the first line
+    ubyte Unk0; 
+    ubyte Unk1;
+    ubyte Unk2;
+    ubyte Unk3;
+    ubyte TileIndex; //Unlike p3 these indexes start from 1
+    ubyte RotationOrSubindex; 
+    ubyte TileSizeX;
+    ubyte TileSizeY;
+    ubyte Unk4;
+    ubyte Unk5;
+    ubyte Unk6;
+    ubyte Unk7;
+} MapTile;
+
+typedef struct {
+    MapTile Tiles[16]; 
+} MapLine;
+
+typedef struct {
+    ushort MajorId;
+    ushort MinorId;
+    //These ids don't seem to be used for anything and the game
+    // uses the filenames instead (they also often don't match the filename)
+
+
+    FSeek(FTell() - 4);
+    //The major and minor ids are inside the first tile for some reason
+    MapLine MapLines[16];
+
+    //Any data after this point is just padding
+} MapFile;
+
+MapFile File;

@@ -1,0 +1,279 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "include/common.bt"
+
+typedef enum<uint> 
+{
+    PlayerNameChunk = 0x1,
+    PlayerStatsChunk = 0x2,
+    PlayerEquipmentChunk = 0x5,
+    EquipmentItemsChunk = 0x6,
+    UsableItemsCountsChunk = 0x7,
+    PassedDaysChunk = 0x8,
+    TimeOfDayChunk = 0x9,
+    NextTimeIsSetChunk = 0xa,
+    NextPassedDaysChunk = 0xb,
+    NextTimeOfDayChunk = 0xc,
+    EquipedPersonaChunk = 0xe,
+    MCPersonas = 0xf,
+    CompendiumPersonas = 0x10,
+    FlagsChunk = 0x11,
+    MoneyChunk = 0x12,
+    PartyChunk = 0x13,
+    FieldMajorIdChunk = 0x15,
+    FieldMinorIdChunk = 0x16,
+    TartarusFloorChunk = 0x17,
+    CountersChunk = 0x19,
+    CurrentQuestsChunk = 0x1B,
+    YukariStatsChunk = 0x101,
+    YukariEquipmentChunk = 0x103,
+    YukariPersonaStatsChunk = 0x105,
+    AigisStatsChunk = 0x201,
+    AigisEquipmentChunk = 0x203,
+    AigisPersonaStatsChunk = 0x205,
+    MitsuruStatsChunk = 0x301,
+    MitsuruEquipmentChunk = 0x303,
+    MitsuruPersonaStatsChunk = 0x305,
+    JunpeiStatsChunk = 0x401,
+    JunpeiEquipmentChunk = 0x403,
+    JunpeiPersonaStatsChunk = 0x405,
+    FuukaStatsChunk = 0x501,
+    FuukaEquipmentChunk = 0x503,
+    FuukaPersonaStatsChunk = 0x505,
+    AkihikoStatsChunk = 0x601,
+    AkihikoEquipmentChunk = 0x603,
+    AkihikoPersonaStatsChunk = 0x605,
+    KenStatsChunk = 0x701,
+    KenEquipmentChunk = 0x703,
+    KenPersonaStatsChunk = 0x705,
+    ShinjiroMetisStatsChunk = 0x801,
+    ShinjiroMetisEquipmentChunk = 0x803,
+    ShinjiroMetisPersonaStatsChunk = 0x805,
+    KoromaruStatsChunk = 0x901,
+    KoromaruEquipmentChunk = 0x903,
+    KoromaruPersonaStatsChunk = 0x905,
+    ChecksumChunk = 0x2000,
+} SaveChunkId;
+
+typedef struct
+{
+    ubyte Unk0[6];
+    ushort Level;
+    ushort HP;
+    ushort SP;
+    ubyte Unk1[38];
+    ushort Mood;
+    ubyte Unk2[8];
+    ushort Courage;
+    ushort Charm;
+    ushort Academics;
+    ushort Unk3;
+    ushort Exp;
+    ubyte Unk4[10];
+} CharacterStats;
+
+typedef struct
+{
+    uint Weapon;
+    uint Accessory;
+    ubyte Unk[72];
+} CharacterEquipment;
+
+typedef struct
+{
+    Bool2 Owned;
+    ushort Id;
+    ubyte Level;
+    ubyte Unk0;
+    ushort Unk1;
+    ushort Exp;
+    ushort Unk2;
+    short Skills[8];
+    ubyte Strength;
+    ubyte Magic;
+    ubyte Endurance;
+    ubyte Agility;
+    ubyte Luck;
+    ubyte Unk4[19];
+} PersonaStats;
+
+typedef struct
+{
+    SaveChunkId ChunkId;
+    int ChunkSize;
+
+    switch (ChunkId)
+    {
+        case PlayerNameChunk:
+             //Weird encoding (2 bytes per char, second byte is ASCII - 96)
+            char LastName[8 * 2];
+            FSkip(2);
+            char FirstName[8 * 2];
+            FSkip(2);
+            break;
+        case PlayerStatsChunk:
+            CharacterStats PlayerStats;
+            break;
+        case PlayerEquipmentChunk:
+            ushort Weapon;
+            ushort BodyArmor;
+            ushort ShoeArmor;
+            ushort Accessory;
+            break;
+        case UsableItemsCountsChunk:
+            ushort ItemCounts[ChunkSize / 2]; break;
+        case TimeOfDayChunk:
+            ubyte TimeOfDay; break;
+        case PassedDaysChunk:
+            ushort PassedDays; break;
+        case NextTimeIsSetChunk:
+            Bool4 NextTimeIsSet; break;
+        case NextTimeOfDayChunk:
+            ubyte NextTimeOfDay; break;
+        case EquipedPersonaChunk:
+            ushort EquipedPersonaIndex; break;
+        case MCPersonas:
+            PersonaStats MCPersona[ChunkSize / 52]; break;
+        case CompendiumPersonas:
+            PersonaStats CompendiumPersona[ChunkSize / 52]; break;
+        case NextPassedDaysChunk:
+            ushort NextPassedDays; break;
+        case FlagsChunk:
+            ubyte Flags[ChunkSize]; break;
+        case MoneyChunk:
+            uint Money; break;
+        case PartyChunk:
+            ushort Slot1;
+            ushort Slot2;
+            ushort Slot3;
+            FSkip(2);
+            break;
+        case FieldMajorIdChunk:
+            int MajorFieldId;
+            break; //both can be set to -1
+        case FieldMinorIdChunk:
+            int MinorFieldId;
+            break;
+        case TartarusFloorChunk:
+            int Floor;
+            break;
+        case CountersChunk:
+            int Counters[ChunkSize / 4];
+            break;
+        case CurrentQuestsChunk:
+            short Quest1Id;
+            FSkip(2);
+            short Quest2Id;
+            FSkip(2);
+            short Quest3Id;
+            FSkip(2);
+            FSkip(4);
+            break;
+
+        case YukariStatsChunk:
+            CharacterStats YukariStats; break;
+        case YukariEquipmentChunk:
+            CharacterEquipment YukariEquipment; break;
+        case YukariPersonaStatsChunk:
+            PersonaStats YukariPersona; break;
+
+        case AigisStatsChunk:
+            CharacterStats AigisStats; break;
+        case AigisEquipmentChunk:
+            CharacterEquipment AigisEquipment; break;
+        case AigisPersonaStatsChunk:
+            PersonaStats AigisPersona; break;
+
+        case MitsuruStatsChunk:
+            CharacterStats MitsuruStats; break;
+        case MitsuruEquipmentChunk:
+            CharacterEquipment MitsuruEquipment; break;
+        case MitsuruPersonaStatsChunk:
+            PersonaStats MitsuruPersona; break;
+
+        case JunpeiStatsChunk:
+            CharacterStats JunpeiStats; break;
+        case JunpeiEquipmentChunk:
+            CharacterEquipment JunpeiEquipment; break;
+        case JunpeiPersonaStatsChunk:
+            PersonaStats JunpeiPersona; break;
+
+        case FuukaStatsChunk:
+            CharacterStats FuukaStats; break;
+        case FuukaEquipmentChunk:
+            CharacterEquipment FuukaEquipment; break;
+        case FuukaPersonaStatsChunk:
+            PersonaStats FuukaPersona; break;
+
+        case AkihikoStatsChunk:
+            CharacterStats AkihikoStats; break;
+        case AkihikoEquipmentChunk:
+            CharacterEquipment AkihikoEquipment; break;
+        case AkihikoPersonaStatsChunk:
+            PersonaStats AkihikoPersona; break;
+
+        case KenStatsChunk:
+            CharacterStats KenStats; break;
+        case KenEquipmentChunk:
+            CharacterEquipment KenEquipment; break;
+        case KenPersonaStatsChunk:
+            PersonaStats KenPersona; break;
+
+        case ShinjiroMetisStatsChunk:
+            CharacterStats ShinjiroMetisStats; break;
+        case ShinjiroMetisEquipmentChunk:
+            CharacterEquipment ShinjiroMetisEquipment; break;
+        case ShinjiroMetisPersonaStatsChunk:
+            PersonaStats ShinjiroMetisPersona; break;
+
+        case KoromaruStatsChunk:
+            CharacterStats KoromaruStats; break;
+        case KoromaruEquipmentChunk:
+            CharacterEquipment KoromaruEquipment; break;
+        case KoromaruPersonaStatsChunk:
+            PersonaStats KoromaruPersona; break;
+
+        case ChecksumChunk:
+            ubyte CheckSum; break;
+        default:
+            ubyte ChunkData[ChunkSize];
+    }
+} SaveChunk <read=SaveChunk_ToString>;
+
+string SaveChunk_ToString(SaveChunk& val)
+{
+    local string str = EnumToString(val.ChunkId);
+    return str;
+}
+
+typedef struct
+{
+    int FileIdentifier <bgcolor=cGreen>;
+    byte Padding[0x34] <bgcolor=cBlack>;
+
+    local uint check = 0;
+    while (true)
+    {
+        check = ReadUInt();
+        if (check == 0xffffffff)
+            break;
+        SetRandomBackColor();
+        SaveChunk Chunks;
+        if (check == 0x2000)
+            break;
+    }
+    
+} SaveFile;
+
+SaveFile File;

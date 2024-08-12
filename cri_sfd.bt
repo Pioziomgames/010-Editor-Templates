@@ -1,0 +1,87 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Criware sofdec video files
+//   Authors: Pio
+//   Version: 1.0
+//   Purpose: 
+//  Category: Video
+// File Mask: *.sfd
+//  ID Bytes: 0xBA010000
+//   History: 
+//------------------------------------------------
+
+//Sfd files follow the MPEG program stream structure
+//and contain adx audio data together with mpeg1 or mpeg2 video data
+
+#include "include/common.bt"
+
+typedef enum<uint>
+{
+    PSEndStream = 0x000001B9,
+    MpegPSHeader = 0x000001BA,
+    PSSystemHeader = 0x000001BB,
+    PSPaddingData = 0x000001BE,
+    SofdecStreamHeader = 0x000001BF,
+    PSAudioData = 0x000001C0,
+    PSVideoData = 0x000001E0,
+} SyncBytes;
+
+typedef struct MpegStreamPackHeader
+{
+    uint64 SCRBase : 33;
+    uint64 MuxRate : 22;
+    uint64 Stuffing : 3;
+};
+
+typedef struct SystemHeader
+{
+    uint64 RateBound : 22;
+    uint64 AudioBound : 6;
+    uint64 FixedFlag : 1;
+    uint64 CSPSFlag : 1;
+    uint64 VideoBound : 5;
+    uint64 PacketRateRestrictionFlag : 1;
+    uint64 Reserved : 7;
+    ubyte StreamIDs [ChunkSize-8];
+};
+
+typedef struct
+{
+    SyncBytes Sync;
+    if (Sync != MpegPSHeader && Sync != PSEndStream) //Why would you do this
+        ushort ChunkSize;
+    
+    switch (Sync)
+    {
+        case MpegPSHeader:
+            MpegStreamPackHeader PSHeader; break;
+        case PSSystemHeader:
+            SystemHeader SysHeader; break;
+        case PSEndStream:
+            ubyte StreamEndPadding[2044]; break;
+        default:
+            ubyte ChunkData[ChunkSize];
+    }
+} MpegPsChunk <optimize=false, name="PSChunk",read=MpegPsChunk_ToString>;
+
+string MpegPsChunk_ToString(MpegPsChunk& val)
+{
+    local string str = "";
+    if (val.Sync != MpegPSHeader && val.Sync != PSEndStream)
+        SPrintf(str,"%s: %i", EnumToString( val.Sync ), val.ChunkSize);
+    else
+        str = EnumToString( val.Sync );
+    return str;
+}
+
+typedef struct 
+{
+    BigEndian();
+    while (FTell() < FileSize() - 6)
+    {
+        MpegPsChunk PsChunk;
+    }
+} SfdFile <optimize=false>;
+
+SfdFile File;

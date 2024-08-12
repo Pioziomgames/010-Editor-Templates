@@ -3,13 +3,15 @@
 //
 //      File: Atlus environment files
 //   Authors: Pioziomgames
-//   Version: 1.2
+//   Version: 1.5
 //   Purpose: Editing fog and lighting
 //  Category: Other
 // File Mask: *.env
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
+
+#include "include/common.bt"
 
 typedef struct 
 {
@@ -41,9 +43,9 @@ typedef struct
 
     RGB FogRGB <name="Fog RGB">;
     byte EnableFog <bgcolor=cYellow>;
-    float FN <bgcolor=cBlue>;
-    float CF <bgcolor=cRed>;
-    float Unk <bgcolor=cBlack>;
+    float FogNear <bgcolor=cBlue>;
+    float CameraFar <bgcolor=cRed>;
+    float CameraNear <bgcolor=cBlack>;
 } fog;
 
 typedef struct 
@@ -51,7 +53,7 @@ typedef struct
 
     FloatRGBA Ambient <name="MC Ambient">;
     FloatRGBA CharacterLight <name="MC Light">;
-    byte unk[64] <bgcolor=cBlack>;
+    Matrix4x4 LightDirection <bgcolor=cPurple>;
 } Char;
 
 typedef struct 
@@ -59,40 +61,46 @@ typedef struct
 
     FloatRGBA Ambient <name="NPC Ambient">;
     FloatRGBA CharacterLight <name="NPC Light">;
-    byte unk[64] <bgcolor=cBlack>;
+    float ProbablyRadius;
+    Matrix4x4 LightDirection <bgcolor=cPurple>;
 } NPC;
 
 typedef struct 
 {
-    byte unk[100] <bgcolor=cBlack>;
-} SEPNPC;
+    byte unk[80] <bgcolor=cBlack>;
+} SEP;
 
-typedef struct 
-{
-    byte unk[92] <bgcolor=cBlack>;
-} SEPMC;
 
 typedef struct 
 {
     fog Fog <name="Fog">;
     FloatRGBA Ambient <name="Field Ambient">;
     FloatRGBA Light <name="Field Light">;
-    byte unk[68] <bgcolor=cBlack>;
-
+    float ProbablyRadius;
+    Matrix4x4 LightDirection <bgcolor=cPurple>;
 } field;
 
 
 typedef struct 
 {
     int Magic <bgcolor=cGreen>;
-    byte Unk1[8] <bgcolor=cBlack>;
+    byte Unk1[4] <bgcolor=cBlack>;
+    ubyte FilterId;
+    ubyte FilterMode;
+    ubyte Unk2;
+    ubyte FilterAlpha;
     field Field <name = "Field">;
     Char EnvChar <name="MC">;
-    SEPMC SepMc <name = "SEP MC">;
+    SEP SepMc <name = "SEP MC">;
+    float AmbientSurface <bgcolor=0xFF4200>;
+    float DiffuseSurface <bgcolor=0xFF6200>;
+    float SpecularSurface <bgcolor=0xFF8200>;
     NPC npc <name="NPC">;
-    SEPNPC SepNPC <name="SEP NPC">;
+    SEP SepNPC <name="SEP NPC">;
+    float mcAmbientSurface <bgcolor=0xFF4200>;
+    float mcDiffuseSurface <bgcolor=0xFF6200>;
+    float mcSpecularSurface <bgcolor=0xFF8200>;
+    RGBA BgColor;
 } EnvFile;
-
-
 
 EnvFile File;

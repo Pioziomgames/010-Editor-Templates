@@ -1,0 +1,143 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+
+typedef struct
+{
+    ubyte FileType;
+    ubyte Format;
+    short UserId;
+    int FileSize;
+    uint MAGIC;
+    Assert(MAGIC == 0x30574C46);
+    int Reserved;
+    int SectionCount;
+    ushort LocalIntCount;
+    ushort LocalFloatCount;
+    short Endianess;
+    short Unk;
+    int Padding;
+} BfHeader;
+
+typedef enum<uint> 
+{
+    ProcedureSection = 0,
+    JumpLabelSection = 1,
+    InstructionSection = 2,
+    BMDSection = 3,
+    StringSection = 4,
+} BfSectionType;
+
+typedef struct
+{
+    char Name[ElementSize-8];
+    int InstructionIndex;
+    int Reserved;
+} LabelSection <optimize=false>;
+
+typedef enum<ushort>
+{
+    PUSHI,
+    PUSHF,
+    PUSHIX,
+    PUSHIF,
+    PUSHREG,
+    POPIX,
+    POPFX,
+    PROC,
+    COMM,
+    END,
+    JUMP,
+    CALL,
+    RUN,
+    GOTO,
+    ADD,
+    SUB,
+    MUL,
+    DIV,
+    MINUS,
+    NOT,
+    OR,
+    AND,
+    EQ,
+    NEQ,
+    S,
+    L,
+    SE,
+    LE,
+    IF,
+    PUSHIS,
+    PUSHLIX,
+    PUSHLFX,
+    POPLIX,
+    POPLFX,
+    PUSHSTR,
+    POPREG
+} BfOpcode;
+
+typedef struct (ushort prevOpcode)
+{
+    if (prevOpcode == PUSHI)
+    {
+        int Operand;
+        prevOpcode = -1;
+    }
+    else if (prevOpcode == PUSHF)
+    {
+        float Operand;
+        prevOpcode = -1;
+    }
+    else
+    {
+        BfOpcode opcode;
+        prevOpcode = opcode;
+        ushort Operand;
+    }
+} BfInstruction <optimize=false>;
+
+typedef struct
+{
+    BfSectionType SectionType;
+    int ElementSize;
+    int ElementCount;
+    int ElementsOffset;
+
+    local long curOff = FTell();
+    FSeek(ElementsOffset);
+    local ushort prevOpcode = -1;
+    switch (SectionType)
+    {
+        case InstructionSection:
+            BfInstruction Instruction(prevOpcode)[ElementCount]; break;
+        case ProcedureSection:
+            LabelSection ProcedureLabel[ElementCount]; break;
+        case JumpLabelSection:
+            LabelSection JumpLabel[ElementCount]; break;
+        case BMDSection:
+            if (ElementCount > 0)
+            {
+                #include "atlus_bmd.bt";
+            }
+            break;
+        case StringSection:
+            byte String[ElementCount];
+            break;
+    }
+    FSeek(curOff);
+} BinarySection <optimize=false>;
+
+struct 
+{
+    BfHeader Header;
+    BinarySection Sections[Header.SectionCount];
+} BfFile;

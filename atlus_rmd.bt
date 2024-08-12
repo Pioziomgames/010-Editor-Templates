@@ -27,6 +27,7 @@ typedef enum<uint>
         RwFrameList                       = 0x0000000E, //List of bones
         RwGeometry                        = 0x0000000F, //Geometry data
         RwClump                           = 0x00000010, //Model data
+        RwLight                           = 0x00000012, //Light data (most likely no supported by the games)
         RwAtomic                          = 0x00000014, //Draw bone
         RwTextureNative                   = 0x00000015, //Texture data
         RwGeometryList                    = 0x0000001A, //Geometry list
@@ -45,6 +46,7 @@ typedef enum<uint>
         RmdAnimationTerminator            = 0xF0F00004, //Node marking the end of the current animation
         RmdTransformOverride              = 0xF0F00005, //?? apears in every animation but the animations seems to work without
         RmdNodeLinkList                   = 0xF0F00006, //Node used for attaching objects and effects to bone ids
+        RmdUnknown                        = 0xF0F00070, //???
         RmdVisibilityAnim                 = 0xF0F00080, //Visibility animation
         RmdAnimationCount                 = 0xF0F000F0, //Node containing the amount of animations, always found at the beginning of a file
         RmdParticle                       = 0xF0F000E0, //Node containing an EPL file attached to nodelink Ids (for some reason the file is always aligned to 16 bytes after this chunk and ChunkSize doesn't reflect that)
@@ -61,6 +63,16 @@ string RwNodeId_ToString(RwNodeId& val)
     local string str = EnumToString(temp);
     return str;
 }
+
+typedef struct
+{
+    byte RenderwareVersion : 4;
+    byte MajorVersion : 4;
+    byte MinorVersion : 4;
+    byte MinorRevision : 4;
+    byte BinaryRevision : 6;
+    byte BuildVersion;
+} RwVersion;
 
 typedef enum<ushort>
 {
@@ -388,6 +400,17 @@ typedef struct{
 
 } RwCompressedKeyFrame<optimize=false>;
 
+
+typedef struct {
+    float Time;
+    Quat Rotation;
+    Vec3 Translation;
+    Vec3 Scale;
+    int Padding;
+    int PreviousOffset;
+    
+} RwCustomKeyFrame<optimize=false>;
+
 typedef struct{
     SetRandomBackColor();
     Vec3 Offset;
@@ -540,9 +563,6 @@ typedef struct (RwRasterInfoStruct &Info) {
                 byte PaletteData[Info.PaletteDataLength];
             
             break;
-        default:
-            byte ImageData[Info.TexelDataLength];
-            break;
     }
     //byte ImageData[header.startPos + header.ChunkSize - FTell()];
     
@@ -679,7 +699,7 @@ typedef struct (RwWorldFormat FormatFlags){
     {
         Face2 Faces[FaceCount];
     }
-    struct RmdChunk Extension <name="Extension">;
+    struct RmdChunk Extension <name="Extension", optimize=false>;
 } RwAtomicSectorNode;
 
 typedef struct (RwWorldFormat FormatFlags) {
@@ -712,17 +732,23 @@ typedef enum<uint> {
 typedef struct {
     String32 Name;
     RmdUserDataType Type;
-    int Unk;
+    int ObjectCount;
     if (Type == UserDataFloat)
-        float Value;
+        float Value[ObjectCount];
     else if (Type == UserDataString)
-    {
-        int ValueSize;
-        char Value[ValueSize];
-    }
+        String32 Value[ObjectCount];
     else
-        int Value;
+        int Value[ObjectCount];
 } RmdUserData <optimize=false>;
+
+typedef struct {
+    SetRandomBackColor();
+    RwBoundingSphere BoundingSphere;
+    SetRandomBackColor();
+    Vec3 Vertex[numVerts];
+    SetRandomBackColor();
+    Vec3 Normal[numVerts];
+} RwMorphTarget <optimize=false>;
 
 typedef struct {
     local int startPos = FTell() + 12;
@@ -752,25 +778,42 @@ typedef struct {
         
         struct RmdChunk FrameListNode <name="FrameList">;
         
-        FrameExtensions FExtensions(FrameListNode.FrameCount);
-        
         struct RmdChunk GeometryListNode <name="GeometryList">;
 
-        struct RmdChunk AtomicNodes[AtomicCount] <name="Atomics">;
-
+        if (AtomicCount > 0)
+            struct RmdChunk AtomicNodes[AtomicCount] <name="Atomics">;
+        
+        if (LightCount > 0)
+        {
+            struct RmdChunk LightStruct;
+            struct RmdChunk Light[LightCount];
+        }
         struct RmdChunk Extension <name="ExtensionNode">;
+        break;
+
+    case RwLight:
+        FSkip(12);
+        int FrameIndex;
+        float Red;
+        float Green;
+        float Blue;
+        float Angle;
+        ushort Flags;
+        ushort Type;
         break;
 
     case RwFrameList:
         FSkip(12);
         int FrameCount;
         RwFrame Frames[FrameCount] <optimize=false>;
+        FrameExtensions FExtensions(FrameCount);
         break;
 
     case RwGeometryList:
         FSkip(12);
         int GeometryCount;
-        struct RmdChunk Geom[GeometryCount] <name="GeometryNode">;
+        if (GeometryCount > 0)
+            struct RmdChunk Geom[GeometryCount] <name="GeometryNode">;
         break;
 
     case RwGeometry:
@@ -796,17 +839,23 @@ typedef struct {
         SetRandomBackColor();
         Face Faces[numTris];
         
-        SetRandomBackColor();
-        RwBoundingSphere BoundingSphere;
     
-        SetRandomBackColor();
-        if ((Flags & 0x2) == 0x2)
-            Vec3 Vertex[numVerts];
-        
-        SetRandomBackColor();
-        if ((Flags & 0x10) == 0x10)
-            Vec3 Normal[numVerts];
-    
+        if ( MorphTargets < 2)
+        {
+            SetRandomBackColor();
+            RwBoundingSphere BoundingSphere;
+            SetRandomBackColor();
+            if ((Flags & 0x2) == 0x2)
+                Vec3 Vertex[numVerts];
+            
+            SetRandomBackColor();
+            if ((Flags & 0x10) == 0x10)
+                Vec3 Normal[numVerts];
+        }
+        else
+        {
+            RwMorphTarget MorphTarget[MorphTargets];
+        }
         struct RmdChunk MaterialList <name="MaterialList">;
     
         struct RwGeometryExtension GeomExtension(numVerts) <name="GeometryExtension">;
@@ -864,6 +913,10 @@ typedef struct {
         {
             RwUVKeyFrame UvKeyFrame[Header.FrameCount];
         }
+        else if (Header.KeyFrameType == 0x44A07195)
+        {
+            RwCustomKeyFrame CustomKeyFrame[Header.FrameCount];
+        }
         
         if (Header.KeyFrameType == 2)
         {
@@ -879,11 +932,10 @@ typedef struct {
         ushort Id[2] <comment="Ids used by Node Links">;
         uint EplSize;
 
-        uint Unk;
+        byte padding[12];
         FAlign(16);
         SetRandomBackColor();
         byte EplFile[EplSize];
-        FAlign(16);
     
         break;
 
@@ -925,7 +977,7 @@ typedef struct {
         float Duration;
         uint MaybeKeyFrameSize;
         uint NameSize;
-        uint MaybeVersion;
+        uint Padding;
         char MaterialName[NameSize];
 
         RMDTransparencyKeyFrame KeyFrames[KeyFrameCount];
@@ -984,7 +1036,8 @@ typedef struct {
         RwPrimitiveType PrimitiveType;
         int MeshCount;
         int PrimitiveCount;
-        RwMesh Meshes[MeshCount];
+        if (MeshCount > 0)
+            RwMesh Meshes[MeshCount];
         break;
     case RwUserData:
         uint EntryCount;
@@ -1007,8 +1060,10 @@ string readChunk(local RmdChunk &c) {
 
 struct
 {
-    while(!FEof())
+    while(FTell() < FileSize()-11)
     {
+        if (ReadInt() == 0)
+            break;
         RmdChunk Chunk;
     }
 } RmdFile;

@@ -1,0 +1,115 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//#include "include/common.bt"
+
+typedef struct
+{
+    ubyte FileType;
+    ubyte Format;
+    short UserId;
+    int FileSize;
+    uint MAGIC;
+    Assert(MAGIC == 0x3147534D);
+    int ExtensionSize;
+    int RelocationTableOffset;
+    int RelocationTableSize;
+    int DialogCount;
+    short IsRelocated;
+    short Version;
+} BmdHeader <bgcolor=cPurple>;
+
+typedef struct
+{
+    char Name[24];
+    short PageCount;
+    ushort SpeakerId;
+    if (PageCount > 0)
+    {
+        int PageStartOffsets[PageCount];
+        int TextSize;
+        byte Text[TextSize];
+    }
+} BmdMessage <optimize=false, bgcolor=cGreen>;
+
+
+typedef struct
+{
+    char Name[24];
+    short Extension;
+    short OptionCount;
+    short UseBottomSelectionPattern;
+    short Reserved;
+    
+    if (OptionCount > 0)
+    {
+        int OptionStartOffsets[OptionCount];
+        int TextSize;
+        byte Text[TextSize];
+    }
+} BmdSelection <optimize=false, bgcolor=cRed>;
+
+typedef struct
+{
+    //SetRandomBackColor();
+    int IsSelection;
+    int Offset;
+    if (Offset > 0)
+    {
+        local long CurPos = FTell();
+        FSeek(FileStart + 32 + Offset);
+        if (IsSelection)
+            BmdSelection Selection;
+        else
+            BmdMessage Message;
+        FSeek(CurPos);
+    }
+} BmdDialog <optimize=false, bgcolor=cBlue>;
+
+typedef struct
+{
+    //SetRandomBackColor();
+    int SpeakerOffset;
+    local long CurPos = FTell();
+    FSeek(FileStart + 32 + SpeakerOffset);
+    string SpeakerName;
+    FSeek(CurPos);
+} BmdSpeaker <optimize=false, bgcolor=cYellow>;
+
+typedef struct
+{
+    int NamesOffset;
+    int SpeakerCount;
+    int ExtensionDataOffset;
+    int Reserved;
+
+    if (NamesOffset > 0)
+    {
+        local long CurPos = FTell();
+        FSeek(FileStart + 32 + NamesOffset);
+        BmdSpeaker Speakers[SpeakerCount];
+        FSeek(CurPos);
+    }
+    
+} BmdSpeakerTable <optimize=false, bgcolor=cGray>;
+
+struct 
+{
+    //SetRandomBackColor();
+    local long FileStart = FTell();
+    BmdHeader Header;
+    BmdDialog Dialogs[Header.DialogCount];
+    BmdSpeakerTable SpeakerTable;
+    FSeek(FileStart + Header.RelocationTableOffset);
+    byte RelocationTable[Header.RelocationTableSize];
+} BmdFile;

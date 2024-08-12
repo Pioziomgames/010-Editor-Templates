@@ -1,0 +1,486 @@
+//------------------------------------------------
+//--- 010 Editor v14.0.1 Binary Template
+//
+//      File: Atlus event files
+//   Authors: Pio
+//   Version: 1.0
+//   Purpose: 
+//  Category: Event
+// File Mask: *.pm1 *.pm2 *.pm3
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "include/common.bt"
+
+typedef enum<int>
+{
+	CutInfo = 0,
+    Name = 1,
+    Stage = 2,
+    Unit = 3,
+    Frame = 4,
+    UnusedCamera = 5,
+    Message = 6,
+    Effect = 7,
+    EffectData = 8,
+    UnitData = 9,
+    F1 = 10,
+    F2 = 11,
+    FTB = 12,
+    SLight = 13,
+    SFog = 14,
+    Blur = 15,
+    MultBlur = 16,
+    DistBlur = 17,
+    Filter = 18,
+    MultFilter = 19,
+    RipBlur = 20,
+    ObjectTable = 21,
+    BezierTable = 26,
+    Max = 28,
+} PmdTableType;
+
+typedef enum<short>
+{
+    StageFrame = 0,
+    UnitFrame = 1,
+    CameraFrame = 2,
+    EffectFrame = 3,
+    MessageFrame = 4,
+    SEFrame = 5,
+    FadeFrame = 6,
+    QuakeFrame = 7,
+    BlurFrame = 8,
+    LightFrame = 9,
+    SLightFrame = 10,
+    SFogFrame = 11,
+    SkyFrame = 12,
+    Blur2Frame = 13,
+    MBlurFrame = 14,
+    DBlurFrame = 15,
+    FilterFrame = 16,
+    MFilterFrame = 17,
+    BedFrame = 18,
+    BGMFrame = 19,
+    MG1Frame = 20,
+    MG2Frame = 21,
+    FBFrame = 22,
+    RBlurFrame = 23,
+    TMXFrame = 24,
+    EPLFrame = 26,
+    HBlurFrame = 27,
+    PadActFrame = 28,
+    MovieFrame = 29,
+    TimeIFrame = 30,
+    RenderTexFrame = 31,
+    BistaFrame = 32,
+    CtlCamFrame = 33,
+    WaitFrame = 34,
+    BustupUpFrame = 35,
+    CutinFrame = 36,
+    EventEffectFrame = 37,
+    JumpFrame = 38,
+    KeyFreeFrame = 39,
+    RandomJumpFrame = 40,
+    CustomEventFrame = 41,
+    CondJumpFrame = 42,
+    CondOnFrame = 43,
+    ComuLvJumpFrame = 44,
+    CountJumpFrame = 45,
+    HolyJumpFrame = 46,
+    FieldObjFrame = 47,
+    PackModelFrame = 48,
+    FieldEffFrame = 49,
+    SPUSEFrame = 50,
+    ScriptFrame = 51,
+    BlurFilterFrame = 52,
+    FogFrame = 53,
+    ENVFrame = 54,
+    FldSkyFrame = 55,
+    FldNoiseFrame = 56,
+    CameraStateFrame = 57
+} PmdFrameType;
+
+typedef struct
+{
+    SetRandomBackColor();
+    ubyte FileType;
+    ubyte FileFormat;
+    ushort UserId;
+    int FileSize;
+    char MAGIC[4];
+    int ExpandSize;
+    int TableCount;
+    int Version;
+    uint64 Reserve;
+} PmdHeader;
+
+typedef struct
+{
+    int FirstFrame;
+	int LastFrame;
+	int TotalFrame;
+	int Reserve1;
+	int FieldMajorId;
+	int FieldMinorId;
+	short Unk1;
+	short FBNId;
+	int ENVId;
+	int Unk2;
+} PmdCutInfo;
+
+typedef struct {
+	Vector3 Pos1;
+	Vector3 Pos2;
+	Vector3 Pos3;
+	Vector3 Pos4;
+} BezierCurve <optimize=false>;
+
+typedef struct
+{
+    byte Unk1;
+	byte BezierMax;
+	byte Unk2;
+	byte Unk3;
+    BezierCurve Curve[BezierMax];
+    FSkip((ItemSize-4)-(48 * BezierMax));
+} PmdBezierCurve <optimize=false>;
+
+typedef enum<short>
+{
+	Disabled = 0,
+    Local = 1,
+    Global = 2,
+} FlagType;
+
+typedef enum<short>
+{
+	EVT = 0, 
+	COMMU = 1, //Add 0x300 to flag index
+	SYS = 2, //Add 0x1000 to flag index
+} GlobalFlagType;
+
+typedef struct {
+	short FlagIndex;
+	short CompareValue;
+	FlagType Type;
+	GlobalFlagType GlobalType<comment="Only used when Type is Global">;
+} PmdFlags;
+
+typedef enum<ushort>
+{
+    PlayChannel0,
+    StopChannel0,
+    PlayChannel1,
+    StopChannel1,
+} SECommandType;
+
+typedef struct {
+    int ProbablyUnused;
+    PmdFlags Flags;
+    ushort ID;
+    SECommandType CommandType;
+    FSkip(36);
+} PmdSEFrame;
+
+typedef enum<ushort>
+{
+    Play,
+    FadeIn,
+    FadeOut,
+    Trans,
+    VolumeDown,
+    VolumeUp,
+    AllStop,
+} BGMCommandType;
+
+typedef struct {
+    int ProbablyUnused;
+    PmdFlags Flags;
+    BGMCommandType CommandType;
+    ushort ID;
+    FSkip(37);
+} PmdBGMFrame;
+
+typedef enum<ubyte>
+{
+	Direct = 0,
+	Ref0 = 1,
+	Ref1 = 2,
+	Ref2 = 3,
+	Ref3 = 4,
+	Ref4 = 5,
+	Joutyuu = 6,
+} MessageType;
+
+typedef enum<short>
+{
+	DontUse = 0,
+	LocalFlag0 = 1,
+	LocalFlag1 = 2,
+	LocalFlag2 = 3,
+	LocalFlag3 = 4,
+	LocalFlag4 = 5,
+	LocalFlag5 = 6,
+	LocalFlag6 = 7, //HOUKAGO SASOI (after school invitation)
+	LocalFlag7 = 8, //KYUJITU SASOI (day off invitation)
+	LocalFlag8 = 9, //BASHO2 IKU? (going somewhere)
+	LocalFlag9 = 10, //RESERVE
+} LocalFlags;
+
+typedef struct {
+    int ProbablyUnused;
+	PmdFlags Flags;
+    BitfieldDisablePadding();
+    short MessageId : 12 <comment="Only used when MessageType is DIRECT">;
+    LocalFlags FlagTarget : 4 <comment="Target location of where the result of a choice is going to be stored, not used if MessageType is JOUTYUU">;
+    short Unused <hidden=true>;
+    BitfieldEnablePadding();
+    Bool DisableMessageStop;
+    MessageType Type;
+    Bool TutorialDisplay;
+	FSkip(33);
+} PmdMessageFrame;
+
+typedef struct {
+    int ProbablyUnused;
+    PmdFlags ProbablyUnusedFlags;
+    Bool2 FadeOut;
+    short Index;
+    FSkip(36);
+} PmdFadeFrame;
+
+typedef enum<int>
+{
+	Disp = 0,
+    DirectPosChange = 1,
+    MotionChange = 2,
+    PosChange = 3,
+    RotChange = 4,
+    IconDisp = 5,
+    Kubi = 6,
+    ModelAttach = 7,
+    AlphaChange = 8,
+    Shadow = 9,
+    ScaleChange = 10,
+} PmdControlType;
+
+typedef struct {
+    Bool2 Value;
+    short Unk1;
+    FSkip(32);
+} PmdUnitDisp;
+
+typedef struct
+{
+    Bool Enabled;
+    ubyte Channel;
+    ubyte Kankaku;
+    ubyte Wait;
+} PmdAsioto <comment="Footsteps">;
+
+typedef enum<ubyte>
+{
+	MovePosition, //Move to the position using specified speed or length in frames
+    MoveBezier, //Use a bezier curve to move using specified speed or length in frames
+    //Bezier curve data is stored in a seperate table and assigned based on the index of occurence of this setting
+    MoveDirect, //Instantly move to a specified position
+} MoveHokanType;
+
+
+typedef enum<ubyte>
+{
+	Speed,
+    Length
+} MoveType;
+
+typedef struct
+{
+    MoveHokanType HokanType;
+    if (HokanType != MoveDirect)
+    {
+        MoveType MvType <name="MoveType">;
+        if (MvType == Length)
+            ushort Length;
+        else
+            ushort Speed <comment="One is added to this value in game">;
+            
+        if (HokanType == MovePosition)
+        {
+            Vector3 Position;
+            Bool AutoRotation;
+            FSkip(15);
+        }
+        else
+            FSkip(28);
+        PmdAsioto Asioto;
+    }
+    else
+    {
+        FSkip(3);
+        Vector3 Position;
+        FSkip(20);
+    }
+} PmdUnitMove;
+
+typedef struct
+{
+    ubyte Group1;
+    ubyte Motion1;
+    Bool NoRepeat1;
+    ubyte Hokan1;
+    FSkip(11);
+    Bool UseLoop2;
+    ubyte Group2;
+    ubyte Motion2;
+    ubyte Hokan2;
+    Bool NoRepeat2;
+    short Speed1;
+    short Speed2;
+    FSkip(12);
+} PmdUnitMotionChange;
+
+typedef struct
+{
+    Bool Reset;
+    Bool Fast;
+    short Unk1;
+    Vector3 Rotation;
+    FSkip(20);
+} PmdUnitKubi; //Neck rotation (looking in a specific direction)
+
+typedef struct
+{
+    float Rotation;
+    FSkip(12);
+    int Length;
+    PmdAsioto Asioto;
+    FSkip(12);
+} PmdUnitRotationChange;
+
+typedef struct
+{
+    FSkip(4);
+    float Scale;
+    FSkip(28);
+} PmdUnitScaleChange;
+
+typedef struct
+{
+    ubyte IconIndex;
+    FSkip(35);
+} PmdUnitIconDisp;
+
+typedef struct
+{
+    ubyte UnitId;
+	ubyte Unk1;
+	short PathId;
+	PmdFlags Flags;
+    PmdControlType ControlType;
+    switch (ControlType)
+    {
+        case Kubi:
+            PmdUnitKubi Kubi; break;
+        case MotionChange:
+            PmdUnitMotionChange MotionChange; break;
+        case DirectPosChange:
+        case PosChange:
+            PmdUnitMove UnitMove; break;
+        case RotChange:
+            PmdUnitRotationChange UnitRotate; break;
+        case ScaleChange:
+            PmdUnitScaleChange ScaleChange; break;
+        case Disp:
+            PmdUnitDisp UnitDisp; break;
+        case IconDisp:
+            PmdUnitIconDisp IconDisp; break;
+        default:
+            byte UnitData[36]; break;
+    }
+} PmdUnitFrame;
+
+typedef struct
+{
+	PmdFrameType Type;
+	ushort Frame;
+	ushort Length;
+	short NameIndex;
+	switch (Type)
+	{
+        case UnitFrame:
+            PmdUnitFrame UnitFrame; break;
+        case FadeFrame:
+            PmdFadeFrame FadeFrame; break;
+        case MessageFrame:
+            PmdMessageFrame MessageFrame; break;
+        case SEFrame:
+            PmdSEFrame SEFrame; break;
+        case BGMFrame:
+            PmdBGMFrame BGMFrame; break;
+	    default:
+		    byte Data[52]; break;
+	}
+} PmdFrame <read=PmdFrame_String, optimize=false>;
+
+string PmdFrame_String(PmdFrame& in)
+{
+    local string s = EnumToString(in.Type);
+    if (Strlen(s) == 0)
+        SPrintf(s, "Unkown(%d)", in.Type);
+    SPrintf(s, "%d: %s",in.Frame, s);
+    return s;
+}
+
+typedef struct
+{
+    byte Data[ItemSize];
+} PmdTableData <optimize=false>;
+
+typedef struct
+{
+    SetRandomBackColor();
+    PmdTableType Type;
+    int ItemSize;
+    int ItemCount;
+    int Offset;
+    if (ItemSize > 0 && ItemCount > 0)
+    {
+        local long current = FTell();
+        FSeek(FileStart + Offset);
+        switch (Type)
+        {
+            case Frame:
+                PmdFrame Frames[ItemCount]; break;
+            case BezierTable:
+                PmdBezierCurve Curves[ItemCount]; break;
+            case CutInfo:
+                PmdCutInfo CutInfo; break;
+            case Message:
+                byte BmdFile[ItemSize]; break;
+            default:
+                PmdTableData TableData[ItemCount]; break;
+        }
+        FSeek(current);
+    }
+} PmdTable <read=PmdTable_String, optimize=false>;
+
+string PmdTable_String(PmdTable& in)
+{
+    local string s = EnumToString(in.Type);
+    if (Strlen(s) == 0)
+        SPrintf(s, "Unkown(%d)", in.Type);
+    if (in.ItemSize > 0 && in.ItemCount > 0)
+        SPrintf(s, "%s - %d * %d", s, in.ItemSize, in.ItemCount);
+    else
+        SPrintf(s, "%s - empty", s);
+    return s;
+}
+
+struct 
+{
+    local long FileStart = FTell();
+    PmdHeader Header;
+    PmdTable Tables[Header.TableCount];
+} PmdFile;

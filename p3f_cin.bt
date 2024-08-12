@@ -1,0 +1,83 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: P3Fes cut in files
+//   Authors: Pioziomgames
+//   Version: 0.5
+//   Purpose: Editing cut in data
+//  Category: Persona 3 Fes
+// File Mask: *.cin
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "include/common.bt"
+
+//it seems that cin files (or atleast the sections that cpk files call cin files) were created in a weird way
+//my theory is that they simply removed 256 bytes from the of a cpk file and called that a cin file out of laziness
+//so now we end up with cin files that contain cpk chunks and texture data that's ignored by the game
+
+
+typedef struct
+{
+    if (ReadInt() == 0x4E4943) //Some files appear to be missing those 2 values (probably only unused ones)
+    {
+        char Magic[4];
+        ushort Unk0;
+    }
+    ushort Loop; //Frame at which the animation will wait until the cutin gets hidden
+    //If set to 0 the cutin will not wait
+    ushort ObjectCount; //I think that this value directly affects how much of the file the game will read
+    ubyte unk[22]; //This stuff can change the color of individual objects but in very weird ways
+}CinHeader;
+
+typedef struct CinChunk
+{
+    byte Type; //maybe affects if the object uses a texture or is used a transparency mask?
+    byte Prop;
+    RGBAushort Color;
+    short Y;
+    short X;
+    short Unk0;
+    short Unk1;
+};
+
+typedef struct
+{
+    local int frameCheck;
+    while (true)
+    {
+        frameCheck = ReadShort();
+        CinChunk Chunk;
+        //Each chunk is a corner of the polygon being drawn
+        //(when there's 5 of them a square is drawn? but you can definitly define more complex shapes too)
+        if (frameCheck == -256)
+            break;
+    }
+} CinFrame;
+
+typedef struct
+{
+    SetRandomBackColor();
+    local int check;
+    while (true)
+    {
+        check = ReadShort();
+        if (check == -512)
+        {
+            CinChunk ObjectEndChunk;
+            break;
+        }
+        CinFrame Frames;
+    }
+} ObjectAnimation <optimize=false>;
+
+typedef struct
+{
+    SetRandomBackColor();
+    CinHeader Header;
+    FSkip(10);
+    ObjectAnimation Objects[Header.ObjectCount];
+} Cin <optimize=false>;
+
+LittleEndian();
+Cin CinFile;

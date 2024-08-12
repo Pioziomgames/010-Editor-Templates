@@ -1,0 +1,63 @@
+//------------------------------------------------
+//--- 010 Editor v14.0.1 Binary Template
+//
+//      File: Criware audio archive
+//   Authors: Pio
+//   Version: 0.1
+//   Purpose: 
+//  Category: Audio
+// File Mask: *.afs
+//  ID Bytes: 0x534641
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    uint MAGIC;
+    int FileCount;
+} AfsHeader;
+
+typedef struct
+{
+    int Offset;
+    int Size;
+    local long Current = FTell();
+    FSeek(Start + Offset);
+    byte FileData[Size];
+    //#include "cri_adx.bt";
+    FSeek(Current);
+} AfsFileEntry <optimize=false>;
+
+typedef struct
+{
+    char FileName[32];
+    ushort Year;
+    ushort Month;
+    ushort Day;
+    ushort Hour;
+    ushort Minute;
+    ushort Second;
+    int FileSize;
+} AfsMetadataEntry;
+typedef struct
+{
+    int Offset;
+    int Size;
+    if (Size > 0 && Offset > 0)
+    {
+        local long Current = FTell();
+        FSeek(Start + Offset);
+        AfsMetadataEntry MetadataEntries[Header.FileCount];
+        FSeek(Current);
+    }
+} AfsMetadata;
+
+typedef struct 
+{
+    local long Start = FTell();
+    AfsHeader Header;
+    AfsFileEntry Files[Header.FileCount];
+    AfsMetadata Metadata;
+} AfsFile <optimize=false>;
+
+AfsFile File;

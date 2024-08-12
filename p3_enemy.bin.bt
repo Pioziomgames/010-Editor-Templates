@@ -1,0 +1,51 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//I've got no idea what this file is for
+
+typedef struct 
+{
+    float Unk0; //Gets multiplied by 2 or 3
+    float Unk1; //Gets used for a check if a SQRT of something is smaller than this value
+
+    float Unk2;
+    float Unk3;
+
+    float Unk4; //Used for some rotation calculation stuff
+    float Unk5; //Used in the same function as the previous value
+                //but is also used for a SQRT check
+
+    float Unk6;
+    float Unk7;
+
+    ushort Unk8;
+    ushort Unk9;
+    ushort Unk10;
+    ushort Unk11;
+    float Unk12;
+    float Unk13;
+    ushort Unk14;
+    ushort Unk15;
+    ushort Unk16;
+    ushort Unk17;
+    float Unk18;
+    uint Unk19;
+} EnemyEntry;
+
+typedef struct
+{
+    local int entryCount = FileSize() / 0x40;
+    EnemyEntry Entries[entryCount];
+} EnemyFile;
+
+EnemyFile File;

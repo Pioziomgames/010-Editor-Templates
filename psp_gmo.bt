@@ -755,7 +755,7 @@ string BoneStateArgs_String(BoneStateArgs& input)
 
 typedef struct{
     GmoMeshTypeMode meshType;
-    string ToString = EnumToString(meshType);
+    local string ToString = EnumToString(meshType);
 } MeshTypeArgs <read=MeshTypeArgs_String>;
 
 string MeshTypeArgs_String(MeshTypeArgs& input)
@@ -1200,10 +1200,10 @@ string BoundingBoxArgs_String(BoundingBoxArgs& input)
 }
 
 typedef struct {
-    int pointsCounts;
+    int pointsCount;
     Vector3 points[pointsCount] <optimize=true>;
     local string ToString;
-    SPrintf(ToString, "%i", pointsCounts);
+    SPrintf(ToString, "%i", pointsCount);
 } BoundingPointsArgs <read=BoundingPointsArgs_String>;
 
 string BoundingPointsArgs_String(BoundingPointsArgs& input)

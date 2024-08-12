@@ -1,0 +1,58 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Atlus dungeon map definition
+//   Authors: Pioziomgames
+//   Version: 0.5
+//   Purpose: Editing/Analyzing dungeon layouts
+//  Category: Dungeon
+// File Mask: *.map
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//NOTES:
+//These files represent a 16x16 tile map of a dungeon floor
+//Some tiles may be bigger than 1 for example exit stairs are 4x4
+//The file ids are most likely connected to floors by some other file
+//perhaps dungeonat.bin?
+//The spawn/teleporter position is not defined in this file
+//it's either a different one or hardcoded
+//Same thing with boss reward chests
+
+typedef struct {
+    uint Unused; //Space for the the id that's on the first line
+    ubyte IsUsedForTheMiniMap; //Non main parts of big tiles have this on
+    //but the second value off to mark them as parts of the first tile for map discovery
+    ubyte IsAnActualTile; //The main tile parts always have this and the previous value on
+    ubyte TileIndex;
+    ubyte Unk2;
+    ubyte Unk3;
+    ubyte Unk4;
+    ubyte Rotation;
+    ubyte TileSizeX;
+    ubyte TileSizeY;
+    ubyte Unk5;
+    ubyte Unk6;
+    ubyte Unk7; //Has some very specific values but they don't seem to change anything
+} MapTile;
+
+typedef struct {
+    MapTile Tiles[16]; 
+} MapLine;
+
+typedef struct {
+    ushort MajorId;
+    ushort MinorId;
+    //These ids don't seem to be used for anything and the game
+    //instead uses the filenames (they also often don't match the filename)
+
+
+    FSeek(FTell() - 4);
+    //The major and minor ids are inside the first tile for some reason
+    MapLine MapLines[16];
+
+    //Any data after this point is just padding
+} MapFile;
+
+MapFile File;

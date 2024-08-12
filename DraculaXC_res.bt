@@ -1,0 +1,43 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "include/common.bt"
+
+typedef struct
+{
+    char FileName[8]; //File name and extension are stored seperatly
+    char FileExtension[4]; //They're also both stored in reverse
+    uint FileSize;
+    uint FileOffset;
+    byte Padding[12];
+    
+    local uint cur = FTell();
+    FSeek(FileOffset);
+    byte FileData[FileSize];
+    FSeek(cur);
+} FileEntry <optimize=false, read=EntryRead>;
+
+string EntryRead(FileEntry& input)
+{
+    local string ToString = "";
+    SPrintf(ToString, "%s.%s", input.FileName, input.FileExtension);
+    return ReverseString(ToString);
+}
+
+struct 
+{
+    int Magic;
+    int EntryCount;
+    char Version[4];
+    int Padding;
+    FileEntry Entries[EntryCount];
+} ResFile;

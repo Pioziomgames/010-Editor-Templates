@@ -3,7 +3,7 @@
 //
 //      File: P3Fes Cut-in Archives
 //   Authors: Pioziomgames
-//   Version: 1.5
+//   Version: 1.6
 //   Purpose: Replacing data inside of cut-ins
 //  Category: Persona 3 Fes
 // File Mask: *.cpk
@@ -13,53 +13,22 @@
 //   1.5 - Rework
 //------------------------------------------------
 #include "include/common.bt"
+//This template is unnecessary because it appears that cpk files are just
+//normal (but exported with a terrible exporter) pac files that just store
+//a cin file and it's textures
 
 typedef struct
 {
-    if (!FEof())
-    {   
-        local int test = 0;
-        while(true)
-        {
-            if(FEof())
-            {
-                break;
-            }
-            if (ReadByte(FTell()) == 0)
-            {
-                FSkip(1);
-            }
-            else
-            {
-                break;
-            }
-        }
-    }
-} padding <optimize=false>;
-
-
-typedef struct
-{
-    char FileName[16];
-    ubyte Unknown[236];
+    char FileName[252] <name="File Name",bgcolor=cBlue>;
     int Size<name="File Size",bgcolor=cRed>;
     ubyte File[Size]<name="File",bgcolor=cGreen>;
-    if (FTell() % 2 == 0)
-    {
-        padding Padding;
-    }
-    
+    FAlign(64);
 } CPKChunk <optimize=false>;
-
 
 typedef struct
 {
-    while (FEof() == false)
+    while (FTell() < FileSize()-256)
     {
-        if (FTell() % 2 != 0)
-        {
-            FSkip(-1);
-        }
         CPKChunk File;
     }
 } CPKMain <optimize=false>;

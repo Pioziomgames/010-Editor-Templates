@@ -1,0 +1,88 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Criware audio stream
+//   Authors: Pio
+//   Version: 1.0
+//   Purpose: 
+//  Category: Audio
+// File Mask: *.adx
+//  ID Bytes: 0x0080
+//   History: 
+//------------------------------------------------
+
+//#include "include/common.bt"
+
+typedef enum<ubyte>
+{
+    AdxPreSetPredictionCoeffcients = 0x02,
+    AdxStandard = 0x03,
+    AdxExponentialScale = 0x04,
+    Ahx = 0x10,
+    Ahx2 = 0x11,
+} AdxEncoding;
+
+typedef enum<ubyte>
+{
+    AdxVersion3 = 0x03,
+    AdxVersion4 = 0x04,
+    AdxVersion4NoLoop = 0x05,
+} AdxVersion;
+
+typedef enum<ubyte>
+{
+    None = 0x00,
+    HasEncryption = 0x08,
+} AdxFlags;
+
+typedef struct
+{
+    local long Start = FTell();
+    ushort Identifier;
+    ushort CopyrightOffset;
+    AdxEncoding EncodingType;
+    ubyte BlockSize;
+    ubyte SampleBitDepth;
+    ubyte ChannelCount;
+    uint SampleRate;
+    uint TotalSamples;
+    ushort HighPassFrequency;
+    AdxVersion Version;
+    AdxFlags Flags;
+    if (Version == 0x04 || Version == 0x05)
+    {
+        FSkip(4);
+        int History1;
+        int History2;
+    }
+    ushort LoopAlignmentSamples;
+    ushort LoopEnabled;
+    uint LoopEnabled2;
+    uint LoopBeginSample;
+    uint LoopBeginByte;
+    uint LoopEndSample;
+    uint LoopEndByte;
+    FSeek(Start + CopyrightOffset-2);
+    char Copyright[6];
+} AdxHeader;
+
+typedef struct
+{
+    byte SampleData[Header.BlockSize];
+} AdxSampleBlock;
+
+typedef struct
+{
+    AdxSampleBlock ChannelOneSamples;
+    if (Header.ChannelCount > 1)
+        AdxSampleBlock ChannelTwoSamples;
+} AdxFrame;
+
+typedef struct 
+{
+    BigEndian();
+    AdxHeader Header;
+    AdxFrame SampleData[Header.TotalSamples / 32] <optimize=false>;
+} AdxFile <optimize=false>;
+
+AdxFile File;

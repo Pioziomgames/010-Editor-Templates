@@ -1,0 +1,54 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Atlus function to interaction point asignment
+//   Authors: Pioziomgames
+//   Version: 0.1
+//   Purpose: Editing/Inspecting interaction points
+//  Category: Fields
+// File Mask: h0%3d_0%3d.bin
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//Files of this type seem to assign specific procedures from
+//the field's bf file (e.g. f007.bf) to interaction points defined in hbn files
+
+#include "include/common.bt"
+
+enum<ubyte> InteractionType
+{
+    Automatic = 0, //Walking inside the point will automatically call it's procedure
+    Manual2 = 2, //Same as manual?
+    //I saw both being used in the same file so there has to be some difference
+    Manual = 4, //Walking inside the point will show an interaction prompt
+    //It seems that any other option will result in it being Manual
+};
+
+typedef struct {
+    int EnableOnFlag <comment="Interaction will be enabled if the flag is on">;
+    ubyte Padding[8];
+    ubyte Unk00;
+    InteractionType Type;
+    ushort NameIndex <comment="Index in a list of hardcoded names, 0 means no name">;
+    //This list is at 0x57937A (or 0x6792FA) in US fes SLUS_216.21
+    short ProcedureIndex;
+    short FieldMajor;
+    short FieldMinor;
+    short FieldEntrance;
+    ushort Unk03; //Maybe env?
+    ushort Unk04; //Maybe npc?
+    int ProbablyAlwaysMinusOne;
+    int Unk05; //Observed values: 0, 1, 3, 4
+    int DisableOnFlag <comment="Interaction will be disabled if the flag is on">;
+    int Unk07;
+} hbinEntry;
+
+typedef struct {
+    while (FileSize() - FTell() > 43)
+    {
+        hbinEntry Entry;
+    }
+} hbinFile;
+
+hbinFile File;

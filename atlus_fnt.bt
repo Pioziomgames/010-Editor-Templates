@@ -1,0 +1,97 @@
+//------------------------------------------------
+//--- 010 Editor v14.0.1 Binary Template
+//
+//      File: Atlus bitmap font file
+//   Authors: Pioziomgames
+//   Version: 0.8
+//   Purpose: 
+//  Category: Fonts
+// File Mask: *.fnt
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "include/common.bt"
+
+typedef struct {
+    local long start = FTell();
+    int HeaderSize;
+    int FileSize;
+    byte Unk1[6];
+    
+    ushort GlyphCount;
+    ushort GlyphSizeX;
+    ushort GlyphSizeY;
+    ushort GlyphSizeInBytes;
+    
+    ushort Unk2;
+    
+    FSeek(start + HeaderSize);
+    local int PaletteSize = Pow(2, (GlyphSizeInBytes * 8) / (GlyphSizeX * GlyphSizeY));
+} FntHeader;
+
+typedef struct {
+    ubyte Left;
+    ubyte Right;
+} FntGlyphWidth;
+
+typedef struct {
+    int TableSize;
+    FntGlyphWidth GlyphWidth[TableSize / 2];
+} FntGlyphWidthTable;
+
+typedef struct {
+    int TableSize;
+    if (TableSize > 0)
+        byte Unk[TableSize];
+} FntUnkTable;
+
+typedef struct
+{
+    local long start = FTell();
+    int HeaderSize;
+    int DictionarySize;
+    int CompressedSize;
+    int Unk1;
+    ushort BytesPerGlyph;
+    ushort Unk2;
+    int GlyphCount;
+    int GlyphPosTableSize;
+    int UncompressedSize;
+    FSeek(start + HeaderSize);
+} FntDataHeader;
+
+typedef struct
+{
+    ushort Value1;
+    ushort Value2;
+    ushort Value3;
+} FntDictionaryEntry;
+
+typedef struct
+{
+    SetRandomBackColor();
+    FntDataHeader DataHeader;
+    SetRandomBackColor();
+    FntDictionaryEntry FntCompressedDataDictionary[DataHeader.DictionarySize / 6];
+    SetRandomBackColor();
+    int GlyphTable [DataHeader.GlyphCount];
+    SetRandomBackColor();
+    byte CompressedData[DataHeader.CompressedSize];
+} FntData;
+
+typedef struct {
+    SetRandomBackColor();
+    FntHeader Header;
+    SetRandomBackColor();
+    ColorRGBA8888 Palette[Header.PaletteSize];
+    SetRandomBackColor();
+    FntGlyphWidthTable GlyphWidthTable;
+    SetRandomBackColor();
+    FntUnkTable UnkTable;
+    SetRandomBackColor();
+    int Reserved[Header.GlyphCount];
+    FntData Data;
+} FntFile;
+
+FntFile File;

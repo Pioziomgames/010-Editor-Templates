@@ -1,0 +1,51 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Atlus field npc binary data
+//   Authors: Pioziomgames
+//   Version: 0.5
+//   Purpose: Editing/Inspecting P3 field npcs
+//  Category: Fields
+// File Mask: n*.bin
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//This file is used for spawning npc models 
+
+typedef struct
+{
+    short Month;
+    short Day;
+    int Unk0;
+    FSkip(4);
+    int Unk1;
+    FSkip(16);
+} DateSection;
+
+typedef struct {
+    short ResID; //Is used to match the npc with a virtual npc entry defined in the fbn file
+    short ModelMajorID;
+    short ModelMinorID;
+    short AnimationId; //The default animation the npc will use
+    int MessageID; //Message index in nm*.bmd
+    int FunctionID; //Function index in ns*.bf
+    FSkip(16);
+} NpcSection <optimize=false>;
+
+typedef struct
+{
+    int EntryCount; //The amount of dates which seems to also reflect the amount of used entries
+    //the used entries (where resId is bigger than -1 and model ids are bigger than 0)
+    //are in-between many unused ones but if you ignore the unused ones than you can asign
+    //a date section to each npc section entry with indexes
+    FSkip(28);
+    DateSection Dates[EntryCount];
+    //It doesn't seem like there's a count for those anywhere
+    while (FTell() + 31 < FileSize())
+    {
+        NpcSection Npc;
+    }
+} nbinFile;
+
+nbinFile File;

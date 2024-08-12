@@ -1,0 +1,45 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "include/common.bt"
+
+LittleEndian();
+
+
+struct
+{
+    byte MAGIC[11];
+    uint64 infoOffset;
+    FSeek(infoOffset);
+    ubyte flags;
+
+    local byte flag = flags;
+    if (flags == 0x80) //Flag is at offset
+    {
+        uint64 padding;
+        uint64 flagOffset;
+        FSeek(flagOffset);
+        ubyte actualFlags;
+        flag = actualFlags;
+    }
+    if (flag == 0x01) //Compressed
+    {
+        uint compressedSize;
+        uint uncompressedSize;
+        ubyte compressedIndex[compressedSize];
+    }
+    else if (flag == 0x00) //Uncompressed
+    {
+        uint size;
+        ubyte index[size];
+    }
+} XP3File;

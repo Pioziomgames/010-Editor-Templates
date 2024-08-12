@@ -1,0 +1,245 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Renderware maestro
+//   Authors: Pio
+//   Version: 0.1
+//   Purpose: 
+//  Category: UI
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+//A renderware format that's basically a flash implementation
+//This template is very unfinshed and probably will never be because the files seem so weird
+//The sizes for chunks are completly wrong and I couldn't get these files to open in
+//the official viewer for this format either
+
+#include "include/common.bt"
+
+typedef enum<uint> 
+{
+    rwStruct         = 0x0001,
+    rwMatrix         = 0x000D,
+    rwVCatPlugin     = 0x01A0,
+    rw2dPath         = 0x01A1,
+    rw2dBrush        = 0x01A2,
+    rw2dObject       = 0x01A3,
+    rw2dShape        = 0x01A4,
+    rw2dScene        = 0x01A5,
+    rw2dPickRegion   = 0x01A6,
+    rw2dObjectString = 0x01A7,
+    rw2dAnimPlugin   = 0x01A8,
+    rw2dAnim         = 0x01A9,
+    rw2dKeyframe     = 0x01B0,
+    rw2dMaestro      = 0x01B1,
+} RwNodeId;
+
+typedef enum<int> 
+{
+    rwMatrixNormal = 0x00000001,
+    rwMatrixOrthogonal = 0x00000002,
+    rwMatrixOrthoNormal = 0x00000003,
+    rwMatroxMask = 0x00000003,
+} RwMatrixType;
+
+typedef struct
+{
+    Vector3 Positon;
+    Vector3 Normal;
+} Vertex;
+
+typedef struct
+{
+    byte Annoying[48];
+    
+} MaterialData;
+
+typedef struct
+{
+    local int test = 0;
+    local long pos = FTell();
+    while (test != 417)
+    {
+        test = ReadInt(pos);
+        pos += 4;
+    }
+    byte ShitData[pos - FTell() - 4];
+    int unk04;
+    int unk05;
+    short unk06;
+    short unk07;
+    int unk08;
+    int VertexCount;
+    int unk09;
+    int unk10;
+    int unk11;
+    Vertex Vertices[VertexCount];
+    int unk12;
+    short unk13;
+    short unk14;
+    int unk15;
+    MaterialData Materials[2];
+} MeshData <optimize=false>;
+
+typedef struct
+{
+    RwNodeId NodeId;
+    uint NodeSize;
+    uint NodeVersion;
+} RwNodeHeader <read=readHeader>;
+
+string readHeader(local RwNodeHeader &v) {
+    local RwNodeId temp = v.NodeId;
+    local string s;
+    SPrintf(s,"%s: %i, 0x%x",EnumToString( temp ), v.NodeSize, v.NodeVersion);
+    return s; 
+}
+
+typedef struct
+{
+    SetRandomBackColor();
+    RwNodeHeader Header;
+    Matrix4x3 Matrix;
+    RwMatrixType MatrixType; //Could be wrong
+} RwMatrix;
+
+typedef struct
+{
+    float Red;
+    float Green;
+    float Blue;
+    float Alpha;
+} RGBAFloat;
+
+typedef struct
+{
+    ubyte R;
+    ubyte G;
+    ubyte B;
+    ubyte A;
+} RGBA;
+
+typedef struct
+{
+    RGBAFloat Color;
+    Vector2 UV;
+} RwShadeParameters;
+
+typedef struct
+{
+    int unk1;
+    int unk2;
+    int unk666;
+    Vector4 MaybeBoundingBox;
+    byte unk[16];
+    struct RwNode Matrix;
+} RwUnkTransformThing <optimize=false>;
+
+typedef struct
+{
+    RwUnkTransformThing Transform;
+    int Unk;
+} ObjectTransform;
+
+typedef struct
+{
+    byte Unk[16];
+} RwWeirdThing;
+
+typedef struct
+{
+    int unk1;
+    struct RwNode Matrix;
+    ubyte unk2[44];
+} RwKeyFrame;
+
+typedef struct
+{
+   struct RwNode Path[PathCount]; 
+} Morph <optimize=false>;
+
+
+typedef struct
+{
+    SetRandomBackColor();
+    RwNodeHeader Header;
+    switch( Header.NodeId )
+    {
+        case rw2dMaestro:
+            byte unk[42];
+            struct RwNode Scene;
+            FSeek(FTell() - 4); //?? maybe it's my fault this time
+            byte unk3[28];
+            int WeirdThingCount;
+            RwWeirdThing Weird[WeirdThingCount];
+            byte ProbablyPadding[8];
+            struct RwNode Anim;
+            break;
+        case rw2dScene:
+            RwUnkTransformThing SceneTransform;
+            int UnkCount;
+            int PathCount;
+            int Unk1;
+            int MorphCount;
+            byte unk2[8];
+            Morph Morphs[MorphCount];
+            FSeek(FTell() - 12);//?????????
+            ObjectTransform MaybeObjectTransforms[UnkCount];
+            break;
+        case rwMatrix:
+            RwMatrix Matrix;
+            break;
+        case rw2dPath: //Why is the size wrong
+            int unk1;
+            int VertexCount;
+            int unk2;
+            int unk3;
+            byte VertexData[24 * VertexCount];
+            struct RwNode Brush;
+            int Unk;
+            break;
+        case rw2dBrush:
+            RwShadeParameters top;
+            RwShadeParameters dtop;
+            RwShadeParameters bottom;
+            RwShadeParameters dbottom;
+            RGBA ColorCache;
+            while (ReadInt() != 417 && ReadInt() != 1065353216) //Weird align stuff???
+            {
+                FSkip(4);
+            }
+            FSkip(-4);
+            break;
+        case rw2dAnim: //?? anim size is bigger than there's space left in the file
+            int KeyFramesCount;
+            int unk2;
+            struct RwNode KeyFrames[KeyFramesCount];
+            break;
+        case rw2dKeyframe: //Not even surprised at this point that the size is wrong
+            int Unk0;
+            int Unk1;
+            int FrameCount;
+            int Unk3;
+            RwKeyFrame KeyFrames[FrameCount];
+            break;
+        default:
+            if (Header.NodeSize > 0)
+                byte Data[Header.NodeSize];
+    }
+} RwNode <optimize=false,read=readNode>;
+
+string readNode(local RwNode &v) {
+    local RwNodeId temp = v.Header.NodeId;
+    local string s;
+    SPrintf(s,"%s: %i, 0x%x",EnumToString( temp ), v.Header.NodeSize, v.Header.NodeVersion);
+    return s; 
+}
+
+typedef struct 
+{
+    RwNode MaestroNode;
+} AnmFile <optimize=false>;
+
+AnmFile File;

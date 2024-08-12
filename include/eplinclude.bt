@@ -65,7 +65,9 @@ typedef struct {
     float Size <name="Effect Scale",bgcolor=cRed>;
     uint Header2[2] <name="Main EPL header",bgcolor=cGreen>;
     int32 DecCount <name="File Count",bgcolor=cPurple>;
-    uint Header3[3] <name="Main EPL header",bgcolor=cGreen>;
+    int Unused;
+    int EpOffset;
+    int SomeTypeFlag;
     local int FileCount = DecCount;
     local int Types[FileCount];
     FileDeclaration FileDec[FileCount];

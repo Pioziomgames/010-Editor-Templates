@@ -7,6 +7,18 @@ enum<byte>Bool
     True = 1
 };
 
+enum<ushort>Bool2
+{
+    False2 = 0,
+    True2 = 1
+};
+
+enum<uint>Bool4
+{
+    False4 = 0,
+    True4 = 1
+};
+
 typedef struct
 {
     ushort B : 5;
@@ -17,6 +29,36 @@ typedef struct
 } ColorBGR565 <read=ColorBGR565_String, optimize=false>;
 
 string ColorBGR565_String(ColorBGR565& input)
+{
+    return input.ToString;
+}
+
+typedef struct
+{
+    ubyte R;
+    ubyte G;
+    ubyte B;
+    ubyte A;
+    local string ToString;
+    SPrintf(ToString, "(%d,%d,%d,%d)", R, G, B, A);
+} ColorRGBA8888 <read=ColorRGBA8888_String, optimize=false>;
+
+string ColorRGBA8888_String(ColorRGBA8888& input)
+{
+    return input.ToString;
+}
+
+typedef struct
+{
+    ushort R;
+    ushort G;
+    ushort B;
+    ushort A;
+    local string ToString;
+    SPrintf(ToString, "(%d,%d,%d,%d)", R, G, B, A);
+} RGBAushort <read=RGBAushort_String, optimize=false>;
+
+string RGBAushort_String(RGBAushort& input)
 {
     return input.ToString;
 }
@@ -172,6 +214,19 @@ string String64_String(String64& input)
 }
 
 //Functions
+
+string ReverseString(string input) {
+    local string reversed = "";
+    local int length = Strlen(input);
+    local int i = length - 1;
+    while (i >= 0)
+    {
+        reversed += input[i];
+        i--;
+    }
+    
+    return reversed;
+}
 
 void FAlign( uint value )
 {

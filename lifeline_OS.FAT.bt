@@ -1,0 +1,37 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+#include "include/common.bt"
+
+LittleEndian();
+
+typedef struct
+{
+    char EntryName[16];
+    uint64 Unk3;
+    uint Offset;
+    uint Size;
+    uint EntryType; //0x10 - directory
+    //0x21 - file
+    uint Unk1;
+    uint Unk2;
+    uint ChildrenCount;
+} Entry;
+
+struct
+{
+    uint MAGIC;
+    uint Flags;
+    uint EntryCount;
+    FSeek(128);
+    Entry Entries[EntryCount];
+} FatFile;
